@@ -1,0 +1,752 @@
+[
+  {
+    "symbols": "🐝🍂",
+    "answer": "believe",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🌞🌻",
+    "answer": "sunflower",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🎂🎉",
+    "answer": "birthday",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🍋🥤",
+    "answer": "lemonade",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🚗🛣️",
+    "answer": "road trip",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🛏️💤",
+    "answer": "bedtime",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🍕📦",
+    "answer": "pizza box",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🐶🐾",
+    "answer": "dog walk",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "📚🏫",
+    "answer": "school books",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🌧️☔",
+    "answer": "rainy day",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🍎📱",
+    "answer": "apple phone",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "💡🔋",
+    "answer": "power light",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🖊️📄",
+    "answer": "paperwork",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🎵🎤",
+    "answer": "sing song",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🍫🍪",
+    "answer": "chocolate chip",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🍞🥐",
+    "answer": "breakfast",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🏠🔑",
+    "answer": "home key",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🧊🍹",
+    "answer": "ice drink",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🧼🖐️",
+    "answer": "handwash",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🧯🔥",
+    "answer": "fire extinguisher",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "📷🖼️",
+    "answer": "photo frame",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "⚽🥅",
+    "answer": "goalpost",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🧑‍🍳🍝",
+    "answer": "cook pasta",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "☕🍩",
+    "answer": "coffee break",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🌲🏕️",
+    "answer": "camping",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🚌🏫",
+    "answer": "school bus",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🔒🔑",
+    "answer": "lock key",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🛒🧾",
+    "answer": "shopping list",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🔔🎓",
+    "answer": "graduation",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🎮🕹️",
+    "answer": "video game",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🏃‍♂️🏁",
+    "answer": "finish line",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "📦📬",
+    "answer": "mail box",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🧭🗺️",
+    "answer": "map guide",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "💍💑",
+    "answer": "engagement",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🩺🏥",
+    "answer": "hospital",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🧳✈️",
+    "answer": "travel luggage",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "📺🍿",
+    "answer": "movie night",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🧯🚒",
+    "answer": "fire truck",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🧱🏗️",
+    "answer": "construction",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🌊🏄",
+    "answer": "surfing",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🧩🧠",
+    "answer": "puzzle brain",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "📈💼",
+    "answer": "business growth",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🍷🧀",
+    "answer": "wine cheese",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🎒📚",
+    "answer": "school bag",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🧯🔥",
+    "answer": "put out fire",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🔭🌌",
+    "answer": "stargazing",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🧤🧣",
+    "answer": "winter wear",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🦉🌃",
+    "answer": "night owl",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "C U L8R",
+    "answer": "see you later",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "CHmadeINA",
+    "answer": "made in china",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "📦🚚",
+    "answer": "package delivery",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "⚡🛠️",
+    "answer": "power tool",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🌍⚡",
+    "answer": "world power",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🍯🐻",
+    "answer": "honey bear",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🌿👣",
+    "answer": "leaf trail",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🎯📈",
+    "answer": "target growth",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🧭🛣️",
+    "answer": "find your way",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🤝📝",
+    "answer": "sign agreement",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "📉📈",
+    "answer": "market swing",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🔁↩️",
+    "answer": "turn back",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🧊🔥",
+    "answer": "hot and cold",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🏖️👜",
+    "answer": "beach bag",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🚦🏃",
+    "answer": "green light",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🔑📚",
+    "answer": "key knowledge",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "💳🏠",
+    "answer": "house loan",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🎬🍿",
+    "answer": "movie night 1",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🛏️🕰️",
+    "answer": "bed time",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "📞✋",
+    "answer": "call off",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🔍🐜",
+    "answer": "small detail",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🍽️🍷",
+    "answer": "dinner party",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🧭📍",
+    "answer": "north point",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🌱🌲",
+    "answer": "growth spurt",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🛶🌊",
+    "answer": "sea voyage",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🧵🪡",
+    "answer": "needle thread",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🖼️🖌️",
+    "answer": "paint picture",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🛡️🗝️",
+    "answer": "guard key",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🧪⚗️",
+    "answer": "lab work",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "✏️🔚",
+    "answer": "end point",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🏃‍♀️💨",
+    "answer": "fast move",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "📚🔖",
+    "answer": "book mark",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🧹🏠",
+    "answer": "clean house",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🗣️💬",
+    "answer": "speak up",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🪙📥",
+    "answer": "coin drop",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🪴🌞",
+    "answer": "plant sun",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🗝️🔓",
+    "answer": "unlock door",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🚲🛣️",
+    "answer": "bike lane",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🎵🎧",
+    "answer": "listen music",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "⚖️📉",
+    "answer": "balance drop",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🧭🗺️",
+    "answer": "lost direction",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "📸🖼️",
+    "answer": "photo frame 1",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🧾💳",
+    "answer": "bill payment",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🛎️🏨",
+    "answer": "hotel service",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "📊🧾",
+    "answer": "report card",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🔒📖",
+    "answer": "locked book",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🛠️🧩",
+    "answer": "fix puzzle",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "HEAD HEELS",
+    "answer": "head over heels",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🦆🦷",
+    "answer": "deduct",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "TIME\nMAN",
+    "answer": "time on your hands",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "W\nATER",
+    "answer": "split water",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "HIT\nROAD",
+    "answer": "hit the road",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "💀📅",
+    "answer": "deadline",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "✉️💥",
+    "answer": "mail bomb",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "📖🔒",
+    "answer": "booked solid",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🪞👤",
+    "answer": "self reflection",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🐍👑",
+    "answer": "king cobra",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🔄📍",
+    "answer": "turn point",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🍵🐸",
+    "answer": "spill the tea",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🔓🔐",
+    "answer": "open and shut",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🧠🔄",
+    "answer": "mind change",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🎭💔",
+    "answer": "tragic play",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🕰️↔️",
+    "answer": "time flies",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🦶👣",
+    "answer": "follow in footsteps",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "👀➡️👣",
+    "answer": "see eye to eye",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🐝❌",
+    "answer": "beeline",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🚪🏃‍♂️",
+    "answer": "make a quick exit",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🔨🪵",
+    "answer": "hit the nail",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🏹🎯",
+    "answer": "aim true",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🌪️💭",
+    "answer": "storm of ideas",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🐎🏇",
+    "answer": "hold your horses",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🌊⬆️",
+    "answer": "rising tide",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🔒🗝️🔓",
+    "answer": "key to unlock",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🌑☀️",
+    "answer": "dark to light",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🧭↗️",
+    "answer": "change direction",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🍽️🕳️",
+    "answer": "eat one's words",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🧱/🧱",
+    "answer": "between a rock and hard place",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🔁🔁",
+    "answer": "back to back",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🎯➡️🏆",
+    "answer": "target achieved",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "👣🔚",
+    "answer": "end of the line",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🌓🔁",
+    "answer": "wax and wane",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🧊➡️💧",
+    "answer": "break the ice",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🔍🧩",
+    "answer": "piece together",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "📉🩺",
+    "answer": "sick economy",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "⚖️🧠",
+    "answer": "weigh the mind",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "💬🔇",
+    "answer": "silence speaks",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🕸️🐜",
+    "answer": "caught in web",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🔌💥",
+    "answer": "short circuit",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🧭🕳️",
+    "answer": "lost cause",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "⌛🔄",
+    "answer": "time is running",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🌉🚶",
+    "answer": "cross the bridge",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🧩🔑",
+    "answer": "missing piece",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🧥🔁",
+    "answer": "turncoat",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🕶️🕵️",
+    "answer": "undercover",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🧨💥",
+    "answer": "blast off",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🧸🎁",
+    "answer": "gift toy",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🍓🍰",
+    "answer": "strawberry shortcake",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🧪🔬",
+    "answer": "science lab",
+    "difficulty": "easy"
+  },
+  {
+    "symbols": "🌧️🐶🐱",
+    "answer": "raining cats and dogs",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "👑🏠",
+    "answer": "crown jewel",
+    "difficulty": "medium"
+  },
+  {
+    "symbols": "🧭🔚",
+    "answer": "last resort",
+    "difficulty": "hard"
+  },
+  {
+    "symbols": "🧠💡🔧",
+    "answer": "brainstorm",
+    "difficulty": "hard"
+  }
+]
