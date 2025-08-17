@@ -172,13 +172,13 @@ body {
 /* Position */
 .relative { position: relative; }
 .absolute { position: absolute; }
-.top-1/2 { top: 50%; }
+.top-1\/2 { top: 50%; }
 .right-2 { right: 0.5rem; }
 .right-12 { right: 3rem; }
 
 /* Transform */
 .transform { transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
-.-translate-y-1/2 { transform: translateY(-50%); }
+.-translate-y-1\/2 { transform: translateY(-50%); }
 
 /* Components */
 .card {
