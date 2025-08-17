@@ -1,103 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../utils/supabase';
-import { stripe, payments } from '../utils/stripe';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { supabase, gamification, customPuzzles } from '../utils/supabase';
 
-// Stripe payment form component
-const PaymentForm = ({ onSuccess, onError }) => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [amount, setAmount] = useState(10);
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!stripe || !elements) return;
-
-    setLoading(true);
-    try {
-      // Create payment intent
-      const { clientSecret } = await payments.createPaymentIntent(amount);
-      
-      // Confirm payment
-      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
-        }
-      });
-
-      if (error) {
-        onError(error.message);
-      } else if (paymentIntent.status === 'succeeded') {
-        // Add funds to account
-        await payments.addFunds(amount);
-        onSuccess(amount);
-        elements.getElement(CardElement).clear();
-      }
-    } catch (error) {
-      onError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+// Gamification stats component
+const GamificationStats = ({ userProfile }) => {
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          Amount to Add ($)
-        </label>
-        <select 
-          value={amount} 
-          onChange={(e) => setAmount(Number(e.target.value))}
-          className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white"
-        >
-          <option value={5}>$5</option>
-          <option value={10}>$10</option>
-          <option value={25}>$25</option>
-          <option value={50}>$50</option>
-          <option value={100}>$100</option>
-        </select>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="text-center p-4 bg-gray-800 rounded-lg">
+        <div className="text-2xl font-bold text-yellow-400">🪙</div>
+        <div className="text-sm text-gray-400">Tokens</div>
+        <div className="text-xl font-bold">{userProfile?.tokens || 0}</div>
       </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          Card Details
-        </label>
-        <div className="p-3 bg-gray-800 border border-gray-600 rounded-lg">
-          <CardElement 
-            options={{
-              style: {
-                base: {
-                  color: '#ffffff',
-                  fontSize: '16px',
-                  '::placeholder': {
-                    color: '#aab7c4',
-                  },
-                },
-              },
-            }}
-          />
-        </div>
+      <div className="text-center p-4 bg-gray-800 rounded-lg">
+        <div className="text-2xl font-bold text-blue-400">⭐</div>
+        <div className="text-sm text-gray-400">Points</div>
+        <div className="text-xl font-bold">{userProfile?.points || 0}</div>
       </div>
-      
-      <button 
-        type="submit" 
-        disabled={!stripe || loading}
-        className="btn btn-primary w-full"
-      >
-        {loading ? 'Processing...' : `Add $${amount}`}
-      </button>
-    </form>
+      <div className="text-center p-4 bg-gray-800 rounded-lg">
+        <div className="text-2xl font-bold text-red-400">🔥</div>
+        <div className="text-sm text-gray-400">Streak</div>
+        <div className="text-xl font-bold">{userProfile?.streak_days || 0} days</div>
+      </div>
+      <div className="text-center p-4 bg-gray-800 rounded-lg">
+        <div className="text-2xl font-bold text-green-400">📊</div>
+        <div className="text-sm text-gray-400">Level</div>
+        <div className="text-xl font-bold">{userProfile?.level || 1}</div>
+      </div>
+    </div>
   );
 };
 
 const Account = ({ goBack }) => {
   const [user, setUser] = useState(null);
-  const [userBalance, setUserBalance] = useState(0);
-  const [transactionHistory, setTransactionHistory] = useState([]);
+  const [userProfile, setUserProfile] = useState(null);
+  const [customPuzzles, setCustomPuzzles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [message, setMessage] = useState('');
 
   // Load user data on component mount
@@ -108,28 +44,13 @@ const Account = ({ goBack }) => {
         if (user) {
           setUser(user);
           
-          // Load user profile data
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('balance, username, total_games, total_wins, total_earnings')
-            .eq('id', user.id)
-            .single();
+          // Load user profile with gamification data
+          const profile = await gamification.getProfile(user.id);
+          setUserProfile(profile);
           
-          if (profile) {
-            setUserBalance(profile.balance || 0);
-          }
-          
-          // Load transaction history
-          const { data: transactions } = await supabase
-            .from('transactions')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(10);
-          
-          if (transactions) {
-            setTransactionHistory(transactions);
-          }
+          // Load user's custom puzzles
+          const puzzles = await customPuzzles.getUserPuzzles(user.id);
+          setCustomPuzzles(puzzles);
         }
       } catch (error) {
         console.error('Error loading user data:', error);
@@ -151,40 +72,14 @@ const Account = ({ goBack }) => {
     }
   };
 
-  // Handle payment success
-  const handlePaymentSuccess = async (amount) => {
-    setMessage(`Successfully added $${amount} to your account!`);
-    setShowPaymentForm(false);
+  // Handle puzzle creation success
+  const handlePuzzleCreated = async () => {
+    setMessage('Custom puzzle created successfully!');
     
-    // Reload user data
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('balance')
-      .eq('id', user.id)
-      .single();
+    // Reload custom puzzles
+    const puzzles = await customPuzzles.getUserPuzzles(user.id);
+    setCustomPuzzles(puzzles);
     
-    if (profile) {
-      setUserBalance(profile.balance);
-    }
-    
-    // Reload transactions
-    const { data: transactions } = await supabase
-      .from('transactions')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(10);
-    
-    if (transactions) {
-      setTransactionHistory(transactions);
-    }
-    
-    setTimeout(() => setMessage(''), 5000);
-  };
-
-  // Handle payment error
-  const handlePaymentError = (errorMessage) => {
-    setMessage(`Payment failed: ${errorMessage}`);
     setTimeout(() => setMessage(''), 5000);
   };
 
@@ -231,51 +126,31 @@ const Account = ({ goBack }) => {
         <div className="text-lg font-semibold">{user.email}</div>
       </div>
       
-      <div className="mb-8 p-6 bg-gray-900 rounded-lg shadow">
-        <div className="text-lg mb-2">Current Balance:</div>
-        <div className="text-4xl font-bold text-green-400 mb-4">${userBalance.toFixed(2)}</div>
-        <button 
-          className="btn btn-primary" 
-          onClick={() => setShowPaymentForm(!showPaymentForm)}
-        >
-          {showPaymentForm ? 'Cancel' : 'Add Funds'}
-        </button>
-      </div>
-      
-      {showPaymentForm && (
-        <div className="mb-8 p-6 bg-gray-900 rounded-lg shadow">
-          <h4 className="text-lg font-semibold mb-4">Add Funds with Stripe</h4>
-          <Elements stripe={stripe}>
-            <PaymentForm 
-              onSuccess={handlePaymentSuccess}
-              onError={handlePaymentError}
-            />
-          </Elements>
-        </div>
-      )}
-      
-      <div className="mb-8">
-        <h3 className="text-xl font-semibold mb-2">Transaction History</h3>
-        <div className="bg-gray-800 rounded-lg p-4">
-          {transactionHistory.length === 0 ? (
-            <div className="text-gray-400">No transactions yet.</div>
-          ) : (
-            <ul>
-              {transactionHistory.map(tx => (
-                <li key={tx.id} className="flex justify-between py-2 border-b border-gray-700 last:border-b-0">
-                  <span className="capitalize">{tx.type.replace('_', ' ')}</span>
-                  <span className={tx.amount > 0 ? 'text-green-400' : 'text-red-400'}>
-                    {tx.amount > 0 ? '+' : ''}${tx.amount}
-                  </span>
-                  <span className="text-gray-400 text-sm">
-                    {new Date(tx.created_at).toLocaleDateString()}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
+                        {/* Gamification Stats */}
+                  <GamificationStats userProfile={userProfile} />
+                  
+                  <div className="mb-8">
+                    <h3 className="text-xl font-semibold mb-2">Custom Puzzles Created</h3>
+                    <div className="bg-gray-800 rounded-lg p-4">
+                      {customPuzzles.length === 0 ? (
+                        <div className="text-gray-400">No custom puzzles created yet.</div>
+                      ) : (
+                        <ul>
+                          {customPuzzles.map(puzzle => (
+                            <li key={puzzle.id} className="flex justify-between py-2 border-b border-gray-700 last:border-b-0">
+                              <span className="text-lg">{puzzle.symbols}</span>
+                              <span className="text-gray-400 text-sm">
+                                {puzzle.answer}
+                              </span>
+                              <span className="text-gray-400 text-xs">
+                                {puzzle.difficulty}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
     </div>
   );
 };
