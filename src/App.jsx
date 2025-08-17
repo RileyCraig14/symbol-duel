@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getRandomPuzzles, checkAnswer } from './utils/puzzleGenerator';
-import { supabase, auth, games, realtime } from './utils/supabase';
+import { supabase, auth, games, gamification, tournaments, dailyChallenges, customPuzzles } from './utils/supabase';
 import PuzzleRound from './components/PuzzleRound';
 import Account from './pages/Account';
+import DailyChallenge from './components/DailyChallenge';
+import CustomPuzzleCreator from './components/CustomPuzzleCreator';
 import './styles/theme.css';
 
 function App() {
@@ -24,11 +26,18 @@ function App() {
 
   // User authentication state
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   // Game state for available games
   const [availableGames, setAvailableGames] = useState([]);
   const [loadingGames, setLoadingGames] = useState(false);
+
+  // Gamification state
+  const [userProfile, setUserProfile] = useState(null);
+  const [showDailyChallenge, setShowDailyChallenge] = useState(false);
+  const [showCustomPuzzleCreator, setShowCustomPuzzleCreator] = useState(false);
+  const [showTournaments, setShowTournaments] = useState(false);
+  const [availableTournaments, setAvailableTournaments] = useState([]);
+  const [customPuzzles, setCustomPuzzles] = useState([]);
 
   // Start multiplayer game
   const startMultiplayerGame = (gameId, entryFee) => {
@@ -443,6 +452,9 @@ function App() {
             setUser(session?.user ?? null);
             if (session?.user) {
               await loadAvailableGames();
+              await loadUserProfile();
+              await loadTournaments();
+              await loadCustomPuzzles();
             }
           }
         );
@@ -459,7 +471,7 @@ function App() {
   }, []);
 
   // Load available games
-  const loadAvailableGames = async () => {
+  const loadAvailableGames = useCallback(async () => {
     if (!user) return;
     
     setLoadingGames(true);
@@ -471,7 +483,39 @@ function App() {
     } finally {
       setLoadingGames(false);
     }
-  };
+  }, [user]);
+
+  // Load user profile
+  const loadUserProfile = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const profile = await gamification.getProfile(user.id);
+      setUserProfile(profile);
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+    }
+  }, [user]);
+
+  // Load tournaments
+  const loadTournaments = useCallback(async () => {
+    try {
+      const tournamentsData = await tournaments.getAll();
+      setAvailableTournaments(tournamentsData);
+    } catch (error) {
+      console.error('Error loading tournaments:', error);
+    }
+  }, []);
+
+  // Load custom puzzles
+  const loadCustomPuzzles = useCallback(async () => {
+    try {
+      const puzzlesData = await customPuzzles.getPublic();
+      setCustomPuzzles(puzzlesData);
+    } catch (error) {
+      console.error('Error loading custom puzzles:', error);
+    }
+  }, []);
 
   // Join an existing game
   const handleJoinGame = async (gameId) => {
@@ -531,10 +575,18 @@ function App() {
               <div className="text-center mb-4">
                 <div className="text-lg text-gray-300">Welcome, {user.email}!</div>
                 <div className="text-sm text-gray-400">Balance: $100.00</div>
+                {userProfile && (
+                  <div className="text-sm text-gray-400 mt-2">
+                    🪙 {userProfile.tokens} tokens | ⭐ {userProfile.points} points | 🔥 {userProfile.streak_days} day streak
+                  </div>
+                )}
               </div>
               <button className="btn btn-primary text-2xl w-full py-6" style={{fontSize:'2.2rem'}} onClick={() => setView('joingame')}>Join Game</button>
               <button className="btn btn-secondary text-xl w-full" onClick={() => setView('creategame')}>Create Game</button>
+              <button className="btn btn-outline text-xl w-full" onClick={() => setShowDailyChallenge(true)}>Daily Challenge</button>
               <button className="btn btn-outline text-xl w-full" onClick={() => setView('practice')}>Practice</button>
+              <button className="btn btn-outline text-xl w-full" onClick={() => setShowTournaments(true)}>Tournaments</button>
+              <button className="btn btn-outline text-xl w-full" onClick={() => setShowCustomPuzzleCreator(true)}>Create Puzzle</button>
               <button className="btn btn-outline text-xl w-full" onClick={goHowToPlay}>How to Play</button>
               <button className="btn btn-outline text-xl w-full" onClick={() => setView('account')}>Account</button>
             </div>
@@ -794,6 +846,94 @@ function App() {
   // Show multiplayer game if active
   if (multiplayerGame) {
     return <MultiplayerGame />;
+  }
+
+  // Show daily challenge modal
+  if (showDailyChallenge) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+        <DailyChallenge
+          onComplete={(results) => {
+            console.log('Daily challenge completed:', results);
+            setShowDailyChallenge(false);
+            // Refresh user profile to show new tokens/points
+            loadUserProfile();
+          }}
+          onClose={() => setShowDailyChallenge(false)}
+        />
+      </div>
+    );
+  }
+
+  // Show custom puzzle creator modal
+  if (showCustomPuzzleCreator) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+        <CustomPuzzleCreator
+          onPuzzleCreated={(puzzle) => {
+            console.log('Puzzle created:', puzzle);
+            setShowCustomPuzzleCreator(false);
+            // Refresh custom puzzles list
+            loadCustomPuzzles();
+          }}
+          onClose={() => setShowCustomPuzzleCreator(false)}
+        />
+      </div>
+    );
+  }
+
+  // Show tournaments modal
+  if (showTournaments) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+        <div className="card max-w-4xl mx-auto max-h-[90vh] overflow-y-auto">
+          <div className="text-center mb-6">
+            <h2 className="text-3xl font-bold gradient-text mb-2">Tournaments</h2>
+            <p className="text-gray-400">Join tournaments to compete and win tokens!</p>
+            <button 
+              onClick={() => setShowTournaments(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+            >
+              ✕
+            </button>
+          </div>
+          
+          {availableTournaments.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-400 mb-4">No tournaments available right now.</p>
+              <button className="btn btn-primary">Create Tournament</button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              {availableTournaments.map(tournament => (
+                <div key={tournament.id} className="card p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-xl font-bold">{tournament.name}</h3>
+                      <p className="text-gray-400">{tournament.description}</p>
+                      <div className="text-sm text-gray-500 mt-2">
+                        🪙 Entry: {tournament.entry_fee_tokens} tokens | 
+                        👥 Players: {tournament.current_players}/{tournament.max_players} |
+                        🏆 Prize Pool: {tournament.prize_pool_tokens} tokens
+                      </div>
+                    </div>
+                    <button 
+                      className="btn btn-primary"
+                      onClick={() => {
+                        // Join tournament logic here
+                        alert('Tournament joining coming soon!');
+                      }}
+                    >
+                      Join
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return null;

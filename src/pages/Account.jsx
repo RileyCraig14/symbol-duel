@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase, gamification, customPuzzles } from '../utils/supabase';
+import { supabase, gamification } from '../utils/supabase';
 
 // Gamification stats component
 const GamificationStats = ({ userProfile }) => {
@@ -32,7 +32,6 @@ const GamificationStats = ({ userProfile }) => {
 const Account = ({ goBack }) => {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
-  const [customPuzzles, setCustomPuzzles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
@@ -47,10 +46,6 @@ const Account = ({ goBack }) => {
           // Load user profile with gamification data
           const profile = await gamification.getProfile(user.id);
           setUserProfile(profile);
-          
-          // Load user's custom puzzles
-          const puzzles = await customPuzzles.getUserPuzzles(user.id);
-          setCustomPuzzles(puzzles);
         }
       } catch (error) {
         console.error('Error loading user data:', error);
@@ -72,16 +67,7 @@ const Account = ({ goBack }) => {
     }
   };
 
-  // Handle puzzle creation success
-  const handlePuzzleCreated = async () => {
-    setMessage('Custom puzzle created successfully!');
-    
-    // Reload custom puzzles
-    const puzzles = await customPuzzles.getUserPuzzles(user.id);
-    setCustomPuzzles(puzzles);
-    
-    setTimeout(() => setMessage(''), 5000);
-  };
+
 
   if (loading) {
     return (
@@ -128,29 +114,6 @@ const Account = ({ goBack }) => {
       
                         {/* Gamification Stats */}
                   <GamificationStats userProfile={userProfile} />
-                  
-                  <div className="mb-8">
-                    <h3 className="text-xl font-semibold mb-2">Custom Puzzles Created</h3>
-                    <div className="bg-gray-800 rounded-lg p-4">
-                      {customPuzzles.length === 0 ? (
-                        <div className="text-gray-400">No custom puzzles created yet.</div>
-                      ) : (
-                        <ul>
-                          {customPuzzles.map(puzzle => (
-                            <li key={puzzle.id} className="flex justify-between py-2 border-b border-gray-700 last:border-b-0">
-                              <span className="text-lg">{puzzle.symbols}</span>
-                              <span className="text-gray-400 text-sm">
-                                {puzzle.answer}
-                              </span>
-                              <span className="text-gray-400 text-xs">
-                                {puzzle.difficulty}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  </div>
     </div>
   );
 };
