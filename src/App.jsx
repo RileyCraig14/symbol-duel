@@ -460,11 +460,9 @@ function App() {
         );
         
         return () => subscription.unsubscribe();
-      } catch (error) {
-        console.error('Error loading user:', error);
-      } finally {
-        setLoading(false);
-      }
+              } catch (error) {
+          console.error('Error loading user:', error);
+        }
     };
     
     loadUser();
