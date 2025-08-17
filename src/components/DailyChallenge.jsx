@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { dailyChallenges, gamification } from '../utils/supabase';
-import { checkAnswer, calculateScore } from '../utils/puzzleGenerator';
+import { dailyChallenges } from '../utils/supabase';
+import { checkAnswer } from '../utils/puzzleGenerator';
 
 const DailyChallenge = ({ onComplete, onClose }) => {
   const [challenge, setChallenge] = useState(null);

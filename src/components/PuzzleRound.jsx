@@ -33,7 +33,7 @@ const PuzzleRound = ({
     } else if (timeLeft === 0 && !isAnswered) {
       handleTimeout();
     }
-  }, [timeLeft, isAnswered]);
+  }, [timeLeft, isAnswered, handleTimeout]);
 
   const handleTimeout = useCallback(() => {
     setIsAnswered(true);

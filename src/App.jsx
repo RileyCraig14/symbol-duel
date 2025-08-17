@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getRandomPuzzles, checkAnswer } from './utils/puzzleGenerator';
-import { supabase, auth, games, gamification, tournaments, dailyChallenges, customPuzzles } from './utils/supabase';
+import { supabase, auth, games, gamification, tournaments } from './utils/supabase';
 import PuzzleRound from './components/PuzzleRound';
 import Account from './pages/Account';
 import DailyChallenge from './components/DailyChallenge';
@@ -332,14 +332,7 @@ function App() {
   const goMain = () => setView('main');
   const goHowToPlay = () => setView('howtoplay');
 
-  // Start a new match from QuickJoin
-  const handleStartMatch = (match) => {
-    setCurrentMatch(match);
-    setCurrentRoundIdx(0);
-    setRoundResults([]);
-    setIsPractice(false);
-    setView('match');
-  };
+
 
   // Practice mode: just start a practice match with 6 random puzzles
   const handleStartPractice = () => {
@@ -439,34 +432,7 @@ function App() {
     );
   };
 
-  // Load user on app start
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-        
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
-            setUser(session?.user ?? null);
-            if (session?.user) {
-              await loadAvailableGames();
-              await loadUserProfile();
-              await loadTournaments();
-              await loadCustomPuzzles();
-            }
-          }
-        );
-        
-        return () => subscription.unsubscribe();
-              } catch (error) {
-          console.error('Error loading user:', error);
-        }
-    };
-    
-    loadUser();
-  }, []);
+
 
   // Load available games
   const loadAvailableGames = useCallback(async () => {
@@ -514,6 +480,35 @@ function App() {
       console.error('Error loading custom puzzles:', error);
     }
   }, []);
+
+  // Load user on app start
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+        
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            setUser(session?.user ?? null);
+            if (session?.user) {
+              await loadAvailableGames();
+              await loadUserProfile();
+              await loadTournaments();
+              await loadCustomPuzzles();
+            }
+          }
+        );
+        
+        return () => subscription.unsubscribe();
+      } catch (error) {
+        console.error('Error loading user:', error);
+      }
+    };
+    
+    loadUser();
+  }, [loadAvailableGames, loadUserProfile, loadTournaments, loadCustomPuzzles]);
 
   // Join an existing game
   const handleJoinGame = async (gameId) => {

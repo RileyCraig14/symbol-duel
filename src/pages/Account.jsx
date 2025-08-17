@@ -33,7 +33,6 @@ const Account = ({ goBack }) => {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState('');
 
   // Load user data on component mount
   useEffect(() => {
