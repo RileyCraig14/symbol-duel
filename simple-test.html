@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple App Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #1a1a1a; color: white; }
+        .test { margin: 20px 0; padding: 15px; border: 1px solid #444; border-radius: 8px; }
+        .success { background: #1e3a1e; border-color: #4ade80; }
+        .error { background: #3a1e1e; border-color: #f87171; }
+        .info { background: #1e1e3a; border-color: #60a5fa; }
+        iframe { width: 100%; height: 600px; border: 1px solid #444; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🧩 Symbol Duel - Simple Test</h1>
+    
+    <div class="test info">
+        <h3>📱 App Status</h3>
+        <p>Testing if the React app is working...</p>
+        <div id="status">Checking...</div>
+    </div>
+
+    <div class="test info">
+        <h3>🎮 App Preview</h3>
+        <p>If the app is working, you should see it below:</p>
+        <iframe id="app-frame" src="http://localhost:3000"></iframe>
+    </div>
+
+    <div class="test info">
+        <h3>🔧 Quick Test</h3>
+        <p>Click the button below to test basic functionality:</p>
+        <button onclick="testApp()">Test App Connection</button>
+        <div id="test-result"></div>
+    </div>
+
+    <script>
+        // Check if app is running
+        async function checkAppStatus() {
+            const statusDiv = document.getElementById('status');
+            try {
+                const response = await fetch('http://localhost:3000');
+                if (response.ok) {
+                    statusDiv.innerHTML = '✅ App is running on localhost:3000';
+                    statusDiv.parentElement.className = 'test success';
+                } else {
+                    statusDiv.innerHTML = '❌ App responded with status: ' + response.status;
+                    statusDiv.parentElement.className = 'test error';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '❌ Cannot connect to app: ' + error.message;
+                statusDiv.parentElement.className = 'test error';
+            }
+        }
+
+        // Test app functionality
+        function testApp() {
+            const resultDiv = document.getElementById('test-result');
+            try {
+                // Test if we can access the app
+                const iframe = document.getElementById('app-frame');
+                if (iframe.contentWindow) {
+                    resultDiv.innerHTML = '✅ App iframe loaded successfully';
+                    resultDiv.style.color = '#4ade80';
+                } else {
+                    resultDiv.innerHTML = '❌ App iframe failed to load';
+                    resultDiv.style.color = '#f87171';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '❌ Test failed: ' + error.message;
+                resultDiv.style.color = '#f87171';
+            }
+        }
+
+        // Check status on load
+        window.onload = checkAppStatus;
+    </script>
+</body>
+</html>

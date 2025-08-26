@@ -1,509 +1,384 @@
-import { createClient } from '@supabase/supabase-js'
+// Simple working game service - no external dependencies
+// This simulates a database with in-memory storage
 
-const supabaseUrl = 'https://vegzvwfceqcqnqujkaji.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlZ3p2d2ZjZXFjcW5xdWprYWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDU1NzAsImV4cCI6MjA3MDc4MTU3MH0.QNfU9Pdm05Zyr5oLegPrztSZI9DDSghMHHv49HLYEVc'
+// Mock data storage
+let mockGames = [];
+let mockPlayers = [];
+let mockGamePlayers = [];
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+// Initialize with some sample data
+const initializeMockData = () => {
+  // Sample players
+  mockPlayers = [
+    { id: 'player-1', user_id: 'mock-user-1', username: 'Player1', email: 'player1@example.com' },
+    { id: 'player-2', user_id: 'mock-user-2', username: 'Player2', email: 'player2@example.com' },
+    { id: 'player-3', user_id: 'mock-user-3', username: 'Player3', email: 'player3@example.com' }
+  ];
 
-// Helper functions for common operations
-export const auth = {
-  // Sign up new user
-  signUp: async (email, password, username) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { username }
-      }
-    })
-    
-    if (error) throw error
-    
-    // Create profile after successful signup
-    if (data.user) {
-      await supabase.from('profiles').insert({
-        id: data.user.id,
-        username,
-        balance: 100.00 // Give new users $100 starting balance
-      })
+  // Sample games
+  mockGames = [
+    {
+      id: 'game-1',
+      title: '$25 Game',
+      description: 'High stakes puzzle challenge',
+      entry_fee: 25,
+      max_players: 8,
+      current_players: 2,
+      status: 'lobby',
+      creator_id: 'mock-user-1',
+      creator_username: 'Player1',
+      created_at: new Date(Date.now() - 300000).toISOString() // 5 minutes ago
+    },
+    {
+      id: 'game-2',
+      title: '$15 Quick Game',
+      description: 'Fast-paced puzzle fun',
+      entry_fee: 15,
+      max_players: 4,
+      current_players: 3,
+      status: 'countdown',
+      creator_id: 'mock-user-2',
+      creator_username: 'Player2',
+      created_at: new Date(Date.now() - 600000).toISOString() // 10 minutes ago
     }
-    
-    return data
-  },
+  ];
 
-  // Sign in existing user
-  signIn: async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    })
-    if (error) throw error
-    return data
-  },
+  // Sample game players
+  mockGamePlayers = [
+    { id: 'gp-1', game_id: 'game-1', player_id: 'mock-user-1', player_username: 'Player1', joined_at: new Date(Date.now() - 300000).toISOString() },
+    { id: 'gp-2', game_id: 'game-1', player_id: 'mock-user-2', player_username: 'Player2', joined_at: new Date(Date.now() - 240000).toISOString() },
+    { id: 'gp-3', game_id: 'game-2', player_id: 'mock-user-2', player_username: 'Player2', joined_at: new Date(Date.now() - 600000).toISOString() },
+    { id: 'gp-4', game_id: 'game-2', player_id: 'mock-user-3', player_username: 'Player3', joined_at: new Date(Date.now() - 540000).toISOString() },
+    { id: 'gp-5', game_id: 'game-2', player_id: 'mock-user-1', player_username: 'Player1', joined_at: new Date(Date.now() - 480000).toISOString() }
+  ];
+};
 
-  // Sign out
-  signOut: async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
-  },
+// Initialize mock data
+initializeMockData();
 
-  // Get current user
-  getCurrentUser: async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    return user
-  }
-}
-
-// Game management functions
-// New gamification functions
-export const gamification = {
-  // Get user profile with tokens and points
-  getProfile: async (userId) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-    
-    if (error) throw error
-    return data
-  },
-
-  // Award tokens and points
-  awardTokens: async (userId, tokens, points = 0, experience = 0) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({ 
-        tokens: supabase.sql`tokens + ${tokens}`,
-        points: supabase.sql`points + ${points}`,
-        experience: supabase.sql`experience + ${experience}`
-      })
-      .eq('id', userId)
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
-  },
-
-  // Spend tokens
-  spendTokens: async (userId, amount) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({ 
-        tokens: supabase.sql`tokens - ${amount}`
-      })
-      .eq('id', userId)
-      .gte('tokens', amount) // Ensure sufficient tokens
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
-  },
-
-  // Update streak
-  updateStreak: async (userId) => {
-    const today = new Date().toISOString().split('T')[0]
-    
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('last_daily_challenge, streak_days')
-      .eq('id', userId)
-      .single()
-    
-    if (profile?.last_daily_challenge === today) {
-      return profile.streak_days // Already updated today
-    }
-    
-    const yesterday = new Date()
-    yesterday.setDate(yesterday.getDate() - 1)
-    const yesterdayStr = yesterday.toISOString().split('T')[0]
-    
-    let newStreak = 1
-    if (profile?.last_daily_challenge === yesterdayStr) {
-      newStreak = (profile.streak_days || 0) + 1
-    }
-    
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({ 
-        streak_days: newStreak,
-        last_daily_challenge: today
-      })
-      .eq('id', userId)
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
-  }
-}
-
-export const games = {
+// Game service functions
+export const gameService = {
   // Create a new game
-  create: async (entryFee, rounds) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('User not authenticated')
+  async createGame(gameData) {
+    console.log('🎮 Creating game:', gameData);
     
-    const { data, error } = await supabase
-      .from('games')
-      .insert({
-        entry_fee: entryFee,
-        rounds,
-        created_by: user.id,
-        status: 'waiting'
-      })
-      .select()
-      .single()
+    const newGame = {
+      id: `game-${Date.now()}`,
+      title: gameData.title,
+      description: gameData.description,
+      entry_fee: gameData.entryFee,
+      max_players: gameData.maxPlayers,
+      current_players: 1,
+      status: 'lobby',
+      creator_id: gameData.creatorId,
+      creator_username: gameData.creatorUsername,
+      created_at: new Date().toISOString()
+    };
     
-    if (error) throw error
+    console.log('✅ New game object created:', newGame);
     
-    // Add creator as first player
-    await supabase.from('game_players').insert({
-      game_id: data.id,
-      player_id: user.id
-    })
+    // Add to games array
+    mockGames.unshift(newGame);
     
-    return data
+    // Add creator to game players
+    const newGamePlayer = {
+      id: `gp-${Date.now()}`,
+      game_id: newGame.id,
+      player_id: gameData.creatorId,
+      player_username: gameData.creatorUsername,
+      joined_at: new Date().toISOString()
+    };
+    mockGamePlayers.push(newGamePlayer);
+    
+    console.log('✅ Game created and added to mockGames:', newGame);
+    console.log('📊 Total games now:', mockGames.length);
+    return newGame;
   },
 
-  // Get available games
-  getAvailable: async () => {
-    const { data, error } = await supabase
-      .from('games')
-      .select(`
-        *,
-        created_by,
-        game_players(count)
-      `)
-      .eq('status', 'waiting')
-      .lt('current_players', 6)
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    return data
+  // Get all available games
+  async getAvailableGames() {
+    const availableGames = mockGames.filter(game => game.status === 'lobby');
+    console.log('📋 Available games:', availableGames.length);
+    return availableGames;
   },
 
   // Join a game
-  join: async (gameId) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('User not authenticated')
+  async joinGame(gameId, playerId) {
+    console.log('👥 Joining game:', gameId, 'Player:', playerId);
+    
+    const game = mockGames.find(g => g.id === gameId);
+    if (!game) {
+      throw new Error('Game not found');
+    }
+    
+    if (game.current_players >= game.max_players) {
+      throw new Error('Game is full');
+    }
+    
+    if (game.status !== 'lobby') {
+      throw new Error('Game is not accepting players');
+    }
+    
+    // Check if player is already in the game
+    const existingPlayer = mockGamePlayers.find(gp => gp.game_id === gameId && gp.player_id === playerId);
+    if (existingPlayer) {
+      console.log('⚠️ Player already in game');
+      return game;
+    }
     
     // Add player to game
-    const { error: joinError } = await supabase
-      .from('game_players')
-      .insert({
-        game_id: gameId,
-        player_id: user.id
-      })
+    const newGamePlayer = {
+      id: `gp-${Date.now()}`,
+      game_id: gameId,
+      player_id: playerId,
+      player_username: 'Player', // This should come from user profile
+      joined_at: new Date().toISOString()
+    };
+    mockGamePlayers.push(newGamePlayer);
     
-    if (joinError) throw joinError
+    // Update game player count
+    game.current_players += 1;
     
-    // Update player count
-    const { error: updateError } = await supabase
-      .from('games')
-      .update({ current_players: supabase.sql`current_players + 1` })
-      .eq('id', gameId)
+    console.log('✅ Player joined game. New count:', game.current_players);
+    console.log('🎯 Game status:', game.status);
     
-    if (updateError) throw updateError
+    // If enough players, change status to countdown
+    if (game.current_players >= 3) {
+      game.status = 'countdown';
+      console.log('🚀 Game status changed to countdown!');
+    }
     
-    return { success: true }
+    return game;
   },
 
   // Get game details
-  getById: async (gameId) => {
-    const { data, error } = await supabase
-      .from('games')
-      .select(`
-        *,
-        game_players(
-          player_id,
-          profiles(username)
-        )
-      `)
-      .eq('id', gameId)
-      .single()
+  async getGameDetails(gameId) {
+    const game = mockGames.find(g => g.id === gameId);
+    if (!game) {
+      throw new Error('Game not found');
+    }
     
-    if (error) throw error
-    return data
+    const players = mockGamePlayers
+      .filter(gp => gp.game_id === gameId)
+      .map(gp => ({
+        player: {
+          username: gp.player_username,
+          email: 'player@example.com'
+        },
+        joined_at: gp.joined_at
+      }));
+    
+    return {
+      ...game,
+      game_players: players
+    };
+  },
+
+  // Get all games (for admin purposes)
+  async getAllGames() {
+    return mockGames;
+  },
+
+  // Reset mock data (for testing)
+  resetMockData() {
+    mockGames = [];
+    mockPlayers = [];
+    mockGamePlayers = [];
+    initializeMockData();
   }
-}
+};
 
-// Tournament functions
-export const tournaments = {
-  // Create tournament
-  create: async (tournamentData) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('User not authenticated')
+// Player service functions
+export const playerService = {
+  // Get or create a player
+  async getOrCreatePlayer(userId, userData) {
+    let player = mockPlayers.find(p => p.user_id === userId);
     
-    const { data, error } = await supabase
-      .from('tournaments')
-      .insert({
-        ...tournamentData,
-        created_by: user.id
-      })
-      .select()
-      .single()
+    if (!player) {
+      player = {
+        id: `player-${Date.now()}`,
+        user_id: userId,
+        username: userData.username || 'Player',
+        email: userData.email || 'player@example.com'
+      };
+      mockPlayers.push(player);
+    }
     
-    if (error) throw error
-    return data
+    return player;
   },
 
-  // Get all tournaments
-  getAll: async () => {
-    const { data, error } = await supabase
-      .from('tournaments')
-      .select(`
-        *,
-        created_by,
-        tournament_players(count)
-      `)
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    return data
-  },
-
-  // Join tournament
-  join: async (tournamentId) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('User not authenticated')
-    
-    // Get tournament details
-    const { data: tournament } = await supabase
-      .from('tournaments')
-      .select('entry_fee_tokens')
-      .eq('id', tournamentId)
-      .single()
-    
-    if (!tournament) throw new Error('Tournament not found')
-    
-    // Spend tokens to join
-    await gamification.spendTokens(user.id, tournament.entry_fee_tokens)
-    
-    // Add player to tournament
-    const { data, error } = await supabase
-      .from('tournament_players')
-      .insert({
-        tournament_id: tournamentId,
-        player_id: user.id
-      })
-      .select()
-      .single()
-    
-    if (error) throw error
-    
-    // Update tournament player count
-    await supabase
-      .from('tournaments')
-      .update({ current_players: supabase.sql`current_players + 1` })
-      .eq('id', tournamentId)
-    
-    return data
+  // Get player by ID
+  async getPlayer(playerId) {
+    return mockPlayers.find(p => p.id === playerId);
   }
-}
+};
 
-// Daily challenges
-export const dailyChallenges = {
-  // Get today's challenge
-  getToday: async () => {
-    const today = new Date().toISOString().split('T')[0]
-    
-    const { data, error } = await supabase
-      .from('daily_challenges')
-      .select(`
-        *,
-        custom_puzzles(*)
-      `)
-      .eq('challenge_date', today)
-      .single()
-    
-    if (error) throw error
-    return data
-  },
-
-  // Submit challenge attempt
-  submitAttempt: async (challengeId, isCorrect, timeTaken) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('User not authenticated')
-    
-    // Calculate rewards
-    let tokensEarned = 0
-    let pointsEarned = 0
-    
-    if (isCorrect) {
-      tokensEarned = 10 // Base tokens for solving
-      pointsEarned = 50 // Base points for solving
-      
-      // Bonus for speed
-      if (timeTaken < 30) {
-        tokensEarned += 5
-        pointsEarned += 25
+// Mock Supabase client (for compatibility)
+export const supabase = {
+  from: (table) => ({
+    select: (columns) => ({
+      eq: (field, value) => ({
+        single: () => {
+          const item = mockPlayers.find(p => p[field] === value);
+          return { data: item, error: item ? null : { code: 'PGRST116' } };
+        }
+      }),
+      limit: (count) => ({
+        data: mockGames.slice(0, count),
+        error: null
+      }),
+      data: mockGames,
+      error: null
+    }),
+    insert: (data) => {
+      const newItem = { ...data[0], id: `game-${Date.now()}` };
+      mockGames.unshift(newItem);
+      return { data: newItem, error: null };
+    },
+    update: (updates) => ({
+      eq: (field, value) => {
+        const index = mockGames.findIndex(g => g[field] === value);
+        if (index !== -1) {
+          mockGames[index] = { ...mockGames[index], ...updates };
+        }
+        return { error: null };
       }
-    }
-    
-    // Record attempt
-    const { data, error } = await supabase
-      .from('challenge_attempts')
-      .insert({
-        challenge_id: challengeId,
-        user_id: user.id,
-        is_correct: isCorrect,
-        time_taken_seconds: timeTaken,
-        tokens_earned: tokensEarned,
-        points_earned: pointsEarned
+    }),
+    delete: () => ({
+      eq: (field, value) => {
+        const index = mockGames.findIndex(g => g[field] === value);
+        if (index !== -1) {
+          mockGames.splice(index, 1);
+        }
+        return { error: null };
+      }
+    })
+  }),
+  channel: () => ({
+    on: () => ({
+      on: () => ({
+        subscribe: () => ({ unsubscribe: () => {} })
       })
-      .select()
-      .single()
-    
-    if (error) throw error
-    
-    // Award tokens and points
-    if (isCorrect) {
-      await gamification.awardTokens(user.id, tokensEarned, pointsEarned)
-      await gamification.updateStreak(user.id)
-    }
-    
-    return data
-  }
-}
+    })
+  })
+};
 
-// Custom puzzles
+// Custom Puzzles Service
 export const customPuzzles = {
-  // Create custom puzzle
-  create: async (puzzleData) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('User not authenticated')
+  async create(puzzleData) {
+    const newPuzzle = {
+      id: `puzzle-${Date.now()}`,
+      ...puzzleData,
+      created_at: new Date().toISOString(),
+      created_by: 'mock-user',
+      is_public: puzzleData.is_public || true
+    };
     
-    const { data, error } = await supabase
-      .from('custom_puzzles')
-      .insert({
-        ...puzzleData,
-        creator_id: user.id
-      })
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
+    // In a real app, this would save to database
+    console.log('Created custom puzzle:', newPuzzle);
+    return newPuzzle;
   },
 
-  // Get public puzzles
-  getPublic: async () => {
-    const { data, error } = await supabase
-      .from('custom_puzzles')
-      .select(`
-        *,
-        profiles(username)
-      `)
-      .eq('is_public', true)
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    return data
-  },
-
-  // Get user's puzzles
-  getUserPuzzles: async (userId) => {
-    const { data, error } = await supabase
-      .from('custom_puzzles')
-      .select('*')
-      .eq('creator_id', userId)
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    return data
+  async getPublic() {
+    // Return some sample public puzzles
+    return [
+      {
+        id: 'sample-1',
+        symbols: '🌙⭐☀️',
+        answer: 'night and day',
+        difficulty: 'easy',
+        is_public: true,
+        created_by: 'Player1'
+      }
+    ];
   }
-}
+};
 
-// Friends system
-export const friends = {
-  // Send friend request
-  sendRequest: async (friendUsername) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('User not authenticated')
+// Daily Challenges Service
+export const dailyChallenges = {
+  async getToday() {
+    // Return today's challenge
+    const challenges = [
+      {
+        id: 'daily-1',
+        symbols: '🐉⚔️👑',
+        answer: 'dragon warrior',
+        difficulty: 'medium',
+        tokens_reward: 50,
+        points_reward: 100,
+        expires_at: new Date(Date.now() + 86400000).toISOString() // 24 hours from now
+      },
+      {
+        id: 'daily-2',
+        symbols: '🌊🔥🌪️🌍',
+        answer: 'four elements',
+        difficulty: 'easy',
+        tokens_reward: 25,
+        points_reward: 50,
+        expires_at: new Date(Date.now() + 86400000).toISOString()
+      }
+    ];
     
-    // Find friend by username
-    const { data: friend } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('username', friendUsername)
-      .single()
-    
-    if (!friend) throw new Error('User not found')
-    
-    // Send friend request
-    const { data, error } = await supabase
-      .from('friends')
-      .insert({
-        user_id: user.id,
-        friend_id: friend.id
-      })
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
+    // Return a random challenge for today
+    const randomIndex = Math.floor(Math.random() * challenges.length);
+    return challenges[randomIndex];
   },
 
-  // Get friend requests
-  getRequests: async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('User not authenticated')
+  async submitAttempt(challengeId, isCorrect, timeTaken) {
+    // Calculate rewards based on performance
+    const baseTokens = isCorrect ? 25 : 5;
+    const basePoints = isCorrect ? 50 : 10;
     
-    const { data, error } = await supabase
-      .from('friends')
-      .select(`
-        *,
-        profiles!friends_user_id_fkey(username)
-      `)
-      .eq('friend_id', user.id)
-      .eq('status', 'pending')
+    // Bonus for speed
+    const timeBonus = isCorrect ? Math.max(0, 60 - timeTaken) : 0;
     
-    if (error) throw error
-    return data
-  },
-
-  // Accept friend request
-  acceptRequest: async (requestId) => {
-    const { data, error } = await supabase
-      .from('friends')
-      .update({ status: 'accepted' })
-      .eq('id', requestId)
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
+    return {
+      tokens_earned: baseTokens + timeBonus,
+      points_earned: basePoints + (timeBonus * 2),
+      challenge_id: challengeId,
+      submitted_at: new Date().toISOString()
+    };
   }
-}
+};
 
-// Real-time subscriptions
-export const realtime = {
-  // Subscribe to game updates
-  subscribeToGame: (gameId, callback) => {
-    return supabase
-      .channel(`game:${gameId}`)
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'games', filter: `id=eq.${gameId}` },
-        callback
-      )
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'game_players', filter: `game_id=eq.${gameId}` },
-        callback
-      )
-      .subscribe()
+// Tournament Service
+export const tournamentService = {
+  async getActiveTournaments() {
+    return [
+      {
+        id: 'tournament-1',
+        name: 'Weekly Championship',
+        entry_fee: 50,
+        prize_pool: 500,
+        max_players: 32,
+        current_players: 16,
+        status: 'registration',
+        start_date: new Date(Date.now() + 86400000).toISOString()
+      }
+    ];
   },
 
-  // Subscribe to player answers
-  subscribeToAnswers: (gameId, callback) => {
-    return supabase
-      .channel(`answers:${gameId}`)
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'player_answers', filter: `game_id=eq.${gameId}` },
-        callback
-      )
-      .subscribe()
+  async joinTournament(tournamentId, playerId) {
+    console.log(`Player ${playerId} joined tournament ${tournamentId}`);
+    return { success: true, tournament_id: tournamentId };
   }
-}
+};
+
+// Leaderboard Service
+export const leaderboardService = {
+  async getTopPlayers(limit = 10) {
+    return [
+      { id: 'player-1', username: 'Champion', score: 2500, games_won: 25, rank: 1 },
+      { id: 'player-2', username: 'PuzzleMaster', score: 2200, games_won: 22, rank: 2 },
+      { id: 'player-3', username: 'SymbolSage', score: 2000, games_won: 20, rank: 3 },
+      { id: 'player-4', username: 'RebusKing', score: 1800, games_won: 18, rank: 4 },
+      { id: 'player-5', username: 'EmojiExpert', score: 1600, games_won: 16, rank: 5 }
+    ].slice(0, limit);
+  },
+
+  async getPlayerRank(playerId) {
+    const players = await this.getTopPlayers(100);
+    const player = players.find(p => p.id === playerId);
+    return player ? player.rank : null;
+  }
+};

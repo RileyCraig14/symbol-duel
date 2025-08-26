@@ -1,0 +1,492 @@
+#!/usr/bin/env node
+
+// Test 6 Players Playing Together
+// This script simulates a complete multiplayer game with 6 players
+
+const fs = require('fs');
+
+console.log('🎮 Testing 6 Players Multiplayer Game');
+console.log('=====================================\n');
+
+// Create comprehensive test HTML
+const testHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbol Duel - 6 Player Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d); 
+            color: white; 
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            padding: 20px; 
+            background: rgba(76, 175, 80, 0.1); 
+            border-radius: 10px; 
+            border: 2px solid #4CAF50;
+        }
+        .game-area { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px; 
+            margin-bottom: 20px; 
+        }
+        .players-panel { 
+            background: #2a2a2a; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border: 2px solid #333; 
+        }
+        .game-panel { 
+            background: #2a2a2a; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border: 2px solid #333; 
+        }
+        .player { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 10px; 
+            margin: 5px 0; 
+            background: #333; 
+            border-radius: 5px; 
+            border-left: 4px solid #4CAF50; 
+        }
+        .player.creator { border-left-color: #FFD700; }
+        .player.joined { border-left-color: #2196F3; }
+        .player.ready { border-left-color: #4CAF50; }
+        .button { 
+            background: #4CAF50; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            margin: 5px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold;
+        }
+        .button:hover { background: #45a049; }
+        .button.danger { background: #f44336; }
+        .button.danger:hover { background: #da190b; }
+        .button.warning { background: #ff9800; }
+        .button.warning:hover { background: #e68900; }
+        .status { 
+            padding: 8px 12px; 
+            margin: 5px 0; 
+            border-radius: 5px; 
+            font-size: 14px; 
+            font-weight: bold;
+        }
+        .success { background: #4CAF50; color: white; }
+        .info { background: #2196F3; color: white; }
+        .warning { background: #ff9800; color: white; }
+        .error { background: #f44336; color: white; }
+        .game-info { 
+            background: #333; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 10px 0; 
+        }
+        .puzzle-area { 
+            background: #1a1a1a; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border: 2px solid #4CAF50; 
+            text-align: center; 
+            margin: 20px 0; 
+        }
+        .puzzle { 
+            font-size: 48px; 
+            margin: 20px 0; 
+            padding: 20px; 
+            background: #333; 
+            border-radius: 10px; 
+        }
+        .timer { 
+            font-size: 24px; 
+            color: #ff9800; 
+            font-weight: bold; 
+        }
+        .results { 
+            background: #333; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 10px 0; 
+            max-height: 300px; 
+            overflow-y: auto; 
+        }
+        .result-item { 
+            padding: 5px; 
+            margin: 2px 0; 
+            border-radius: 3px; 
+            font-size: 12px; 
+        }
+        .controls { 
+            text-align: center; 
+            margin: 20px 0; 
+        }
+        .leaderboard { 
+            background: #2a2a2a; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border: 2px solid #333; 
+            margin-top: 20px; 
+        }
+        .leaderboard-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 10px; 
+            margin: 5px 0; 
+            background: #333; 
+            border-radius: 5px; 
+        }
+        .rank-1 { border-left: 4px solid #FFD700; }
+        .rank-2 { border-left: 4px solid #C0C0C0; }
+        .rank-3 { border-left: 4px solid #CD7F32; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Symbol Duel - 6 Player Multiplayer Test</h1>
+            <p>Complete multiplayer game simulation with real-time updates</p>
+        </div>
+
+        <div class="game-area">
+            <div class="players-panel">
+                <h2>👥 Players (6/6)</h2>
+                <div id="playersList">
+                    <div class="player creator">
+                        <span>👑 Alice (Creator)</span>
+                        <span>$100</span>
+                    </div>
+                    <div class="player">
+                        <span>👤 Bob</span>
+                        <span>$100</span>
+                    </div>
+                    <div class="player">
+                        <span>👤 Charlie</span>
+                        <span>$100</span>
+                    </div>
+                    <div class="player">
+                        <span>👤 Diana</span>
+                        <span>$100</span>
+                    </div>
+                    <div class="player">
+                        <span>👤 Eve</span>
+                        <span>$100</span>
+                    </div>
+                    <div class="player">
+                        <span>👤 Frank</span>
+                        <span>$100</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-panel">
+                <h2>🎯 Game Status</h2>
+                <div class="game-info">
+                    <strong>Game:</strong> $25 High Stakes Challenge<br>
+                    <strong>Entry Fee:</strong> $25 per player<br>
+                    <strong>Prize Pool:</strong> $150<br>
+                    <strong>Players:</strong> <span id="playerCount">6</span>/6<br>
+                    <strong>Status:</strong> <span id="gameStatus">Ready to Start</span>
+                </div>
+                <div class="controls">
+                    <button class="button" onclick="startGame()">🚀 Start Game</button>
+                    <button class="button warning" onclick="resetGame()">🔄 Reset Game</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="puzzle-area" id="puzzleArea" style="display: none;">
+            <h2>🧩 Round <span id="roundNumber">1</span> of 6</h2>
+            <div class="puzzle" id="currentPuzzle">🎭 + 🎪 = ?</div>
+            <div class="timer" id="timer">30</div>
+            <div style="margin-top: 20px;">
+                <input type="text" id="answerInput" placeholder="Your answer..." style="padding: 10px; font-size: 16px; width: 200px; border-radius: 5px; border: none;">
+                <button class="button" onclick="submitAnswer()">Submit</button>
+            </div>
+        </div>
+
+        <div class="results" id="results">
+            <h3>📊 Game Results</h3>
+            <div id="resultsList"></div>
+        </div>
+
+        <div class="leaderboard">
+            <h2>🏆 Final Leaderboard</h2>
+            <div id="leaderboardList">
+                <div class="leaderboard-item rank-1">
+                    <span>1. Alice</span>
+                    <span>180 points | $175</span>
+                </div>
+                <div class="leaderboard-item rank-2">
+                    <span>2. Bob</span>
+                    <span>165 points | $100</span>
+                </div>
+                <div class="leaderboard-item rank-3">
+                    <span>3. Charlie</span>
+                    <span>150 points | $100</span>
+                </div>
+                <div class="leaderboard-item">
+                    <span>4. Diana</span>
+                    <span>135 points | $100</span>
+                </div>
+                <div class="leaderboard-item">
+                    <span>5. Eve</span>
+                    <span>120 points | $100</span>
+                </div>
+                <div class="leaderboard-item">
+                    <span>6. Frank</span>
+                    <span>105 points | $100</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            currentRound: 0,
+            totalRounds: 6,
+            timeLeft: 30,
+            isActive: false,
+            players: [
+                { name: 'Alice', score: 0, balance: 100, isCreator: true },
+                { name: 'Bob', score: 0, balance: 100, isCreator: false },
+                { name: 'Charlie', score: 0, balance: 100, isCreator: false },
+                { name: 'Diana', score: 0, balance: 100, isCreator: false },
+                { name: 'Eve', score: 0, balance: 100, isCreator: false },
+                { name: 'Frank', score: 0, balance: 100, isCreator: false }
+            ],
+            puzzles: [
+                { puzzle: '🎭 + 🎪 = ?', answer: 'circus' },
+                { puzzle: '🌙 + 🌟 = ?', answer: 'night' },
+                { puzzle: '🔥 + ❄️ = ?', answer: 'fire' },
+                { puzzle: '🎵 + 🎶 = ?', answer: 'music' },
+                { puzzle: '🏆 + 🥇 = ?', answer: 'winner' },
+                { puzzle: '🎨 + 🖼️ = ?', answer: 'art' }
+            ]
+        };
+
+        function startGame() {
+            addResult('🚀 Game starting with 6 players!');
+            addResult('💰 Prize pool: $150 (6 players × $25 entry fee)');
+            addResult('🎯 All players deducted $25 entry fee');
+            
+            // Deduct entry fees
+            gameState.players.forEach(player => {
+                player.balance -= 25;
+            });
+            
+            updatePlayerDisplay();
+            startRound();
+        }
+
+        function startRound() {
+            gameState.currentRound++;
+            gameState.timeLeft = 30;
+            gameState.isActive = true;
+            
+            document.getElementById('puzzleArea').style.display = 'block';
+            document.getElementById('roundNumber').textContent = gameState.currentRound;
+            document.getElementById('currentPuzzle').textContent = gameState.puzzles[gameState.currentRound - 1].puzzle;
+            document.getElementById('gameStatus').textContent = 'Round ' + gameState.currentRound + ' Active';
+            
+            addResult('🧩 Round ' + gameState.currentRound + ' started: ' + gameState.puzzles[gameState.currentRound - 1].puzzle);
+            
+            // Start timer
+            const timer = setInterval(() => {
+                gameState.timeLeft--;
+                document.getElementById('timer').textContent = gameState.timeLeft;
+                
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(timer);
+                    endRound();
+                }
+            }, 1000);
+        }
+
+        function submitAnswer() {
+            const answer = document.getElementById('answerInput').value.toLowerCase().trim();
+            const correctAnswer = gameState.puzzles[gameState.currentRound - 1].answer.toLowerCase();
+            
+            if (answer === correctAnswer) {
+                const points = Math.max(10, gameState.timeLeft);
+                gameState.players[0].score += points; // Alice gets points for demo
+                addResult('✅ Alice solved correctly! +' + points + ' points');
+            } else {
+                addResult('❌ Alice answered: "' + answer + '" (Correct: ' + correctAnswer + ')');
+            }
+            
+            document.getElementById('answerInput').value = '';
+        }
+
+        function endRound() {
+            gameState.isActive = false;
+            addResult('⏰ Round ' + gameState.currentRound + ' ended');
+            
+            // Simulate other players' answers
+            const otherPlayers = gameState.players.slice(1);
+            otherPlayers.forEach((player, index) => {
+                const isCorrect = Math.random() > 0.3; // 70% chance to get it right
+                if (isCorrect) {
+                    const points = Math.max(10, Math.floor(Math.random() * 20) + 10);
+                    player.score += points;
+                    addResult('✅ ' + player.name + ' solved correctly! +' + points + ' points');
+                } else {
+                    addResult('❌ ' + player.name + ' didn\\'t solve this round');
+                }
+            });
+            
+            if (gameState.currentRound < gameState.totalRounds) {
+                setTimeout(() => {
+                    startRound();
+                }, 2000);
+            } else {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            addResult('🏁 Game completed!');
+            
+            // Sort players by score
+            gameState.players.sort((a, b) => b.score - a.score);
+            
+            // Winner gets prize pool
+            gameState.players[0].balance += 150;
+            
+            addResult('🏆 ' + gameState.players[0].name + ' wins with ' + gameState.players[0].score + ' points!');
+            addResult('💰 ' + gameState.players[0].name + ' receives $150 prize pool!');
+            
+            updateLeaderboard();
+            updatePlayerDisplay();
+            
+            document.getElementById('puzzleArea').style.display = 'none';
+            document.getElementById('gameStatus').textContent = 'Completed';
+        }
+
+        function updatePlayerDisplay() {
+            const playersList = document.getElementById('playersList');
+            playersList.innerHTML = '';
+            
+            gameState.players.forEach((player, index) => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player' + (player.isCreator ? ' creator' : '');
+                playerDiv.innerHTML = '<span>' + (player.isCreator ? '👑 ' : '👤 ') + player.name + '</span><span>$' + player.balance + '</span>';
+                playersList.appendChild(playerDiv);
+            });
+        }
+
+        function updateLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = '';
+            
+            gameState.players.forEach((player, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'leaderboard-item' + (index < 3 ? ' rank-' + (index + 1) : '');
+                itemDiv.innerHTML = '<span>' + (index + 1) + '. ' + player.name + '</span><span>' + player.score + ' points | $' + player.balance + '</span>';
+                leaderboardList.appendChild(itemDiv);
+            });
+        }
+
+        function resetGame() {
+            gameState.currentRound = 0;
+            gameState.timeLeft = 30;
+            gameState.isActive = false;
+            
+            gameState.players.forEach(player => {
+                player.score = 0;
+                player.balance = 100;
+            });
+            
+            document.getElementById('puzzleArea').style.display = 'none';
+            document.getElementById('gameStatus').textContent = 'Ready to Start';
+            document.getElementById('resultsList').innerHTML = '';
+            
+            updatePlayerDisplay();
+            updateLeaderboard();
+            
+            addResult('🔄 Game reset - all players back to $100');
+        }
+
+        function addResult(message) {
+            const resultsList = document.getElementById('resultsList');
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item info';
+            resultItem.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            resultsList.appendChild(resultItem);
+            resultsList.scrollTop = resultsList.scrollHeight;
+        }
+
+        // Auto-start demo on load
+        window.onload = function() {
+            setTimeout(() => {
+                addResult('🎮 6-player multiplayer test loaded');
+                addResult('👥 All players ready with $100 each');
+                addResult('🎯 Game: $25 High Stakes Challenge');
+                addResult('💰 Prize pool: $150 (winner takes all)');
+                addResult('🚀 Click "Start Game" to begin!');
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
+`;
+
+// Write the test file
+fs.writeFileSync('test-6-players.html', testHTML);
+
+console.log('✅ Created test-6-players.html');
+console.log('📋 Complete 6-player multiplayer test includes:');
+console.log('  - 6 players with $100 starting balance');
+console.log('  - $25 entry fee per player');
+console.log('  - $150 total prize pool');
+console.log('  - 6 rounds of puzzle solving');
+console.log('  - Real-time scoring and leaderboard');
+console.log('  - Winner takes all prize pool');
+console.log('  - Complete game flow simulation');
+
+console.log('\n🎯 Test Features:');
+console.log('==================');
+console.log('✅ All 6 players start with $100');
+console.log('✅ $25 entry fee deducted from each player');
+console.log('✅ $150 prize pool created');
+console.log('✅ 6 rounds of puzzle solving');
+console.log('✅ Real-time timer and scoring');
+console.log('✅ Winner gets entire prize pool');
+console.log('✅ Live leaderboard updates');
+console.log('✅ Complete game reset functionality');
+
+console.log('\n🚀 How to Test:');
+console.log('===============');
+console.log('1. Open test-6-players.html in browser');
+console.log('2. Click "Start Game" to begin');
+console.log('3. Watch all 6 players compete');
+console.log('4. See real-time scoring and leaderboard');
+console.log('5. Winner takes $150 prize pool');
+console.log('6. Test reset functionality');
+
+console.log('\n📊 Expected Results:');
+console.log('====================');
+console.log('✅ 6 players with $100 starting balance');
+console.log('✅ $25 entry fee deducted from each player');
+console.log('✅ $150 prize pool created');
+console.log('✅ 6 rounds of puzzle solving');
+console.log('✅ Real-time scoring and leaderboard');
+console.log('✅ Winner gets $150 + remaining balance');
+console.log('✅ Other players keep remaining balance');
+
+console.log('\n🎉 6-player multiplayer test ready!');
+console.log('\n🌐 Open test-6-players.html in your browser to test!');

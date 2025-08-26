@@ -25,16 +25,6 @@ const PuzzleRound = ({
     setShowResult(false);
   }, [puzzle, timeLimit]);
 
-  // Timer countdown
-  useEffect(() => {
-    if (timeLeft > 0 && !isAnswered) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && !isAnswered) {
-      handleTimeout();
-    }
-  }, [timeLeft, isAnswered, handleTimeout]);
-
   const handleTimeout = useCallback(() => {
     setIsAnswered(true);
     setRoundScore(0);
@@ -44,6 +34,16 @@ const PuzzleRound = ({
       onAnswer(0, false, timeLimit);
     }, 2000);
   }, [onAnswer, timeLimit]);
+
+  // Timer countdown
+  useEffect(() => {
+    if (timeLeft > 0 && !isAnswered) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (timeLeft === 0 && !isAnswered) {
+      handleTimeout();
+    }
+  }, [timeLeft, isAnswered, handleTimeout]);
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();

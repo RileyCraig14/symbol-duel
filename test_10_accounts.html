@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbol Duel - 10 Account Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d); 
+            color: white; 
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            padding: 20px; 
+            background: rgba(76, 175, 80, 0.1); 
+            border-radius: 10px; 
+            border: 2px solid #4CAF50;
+        }
+        .test-area { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px; 
+            margin-bottom: 20px; 
+        }
+        .accounts-panel { 
+            background: #2a2a2a; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border: 2px solid #333; 
+        }
+        .games-panel { 
+            background: #2a2a2a; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border: 2px solid #333; 
+        }
+        .account { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 10px; 
+            margin: 5px 0; 
+            background: #333; 
+            border-radius: 5px; 
+            border-left: 4px solid #4CAF50; 
+        }
+        .account.new { border-left-color: #2196F3; }
+        .account.playing { border-left-color: #ff9800; }
+        .button { 
+            background: #4CAF50; 
+            color: white; 
+            border: none; 
+            padding: 8px 16px; 
+            margin: 3px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 12px;
+        }
+        .button:hover { background: #45a049; }
+        .button.danger { background: #f44336; }
+        .button.danger:hover { background: #da190b; }
+        .button.warning { background: #ff9800; }
+        .button.warning:hover { background: #e68900; }
+        .button.small { padding: 4px 8px; font-size: 10px; }
+        .status { 
+            padding: 5px 10px; 
+            margin: 3px 0; 
+            border-radius: 3px; 
+            font-size: 12px; 
+            font-weight: bold;
+        }
+        .success { background: #4CAF50; color: white; }
+        .info { background: #2196F3; color: white; }
+        .warning { background: #ff9800; color: white; }
+        .error { background: #f44336; color: white; }
+        .game-item { 
+            background: #333; 
+            padding: 10px; 
+            margin: 5px 0; 
+            border-radius: 5px; 
+            border-left: 4px solid #4CAF50; 
+        }
+        .game-item.full { border-left-color: #f44336; }
+        .game-item.countdown { border-left-color: #ff9800; }
+        .game-item.active { border-left-color: #4CAF50; }
+        .results { 
+            background: #2a2a2a; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border: 2px solid #333; 
+            margin-top: 20px; 
+            max-height: 400px; 
+            overflow-y: auto; 
+        }
+        .result-item { 
+            padding: 3px 8px; 
+            margin: 2px 0; 
+            border-radius: 3px; 
+            font-size: 11px; 
+            background: #333;
+        }
+        .controls { 
+            text-align: center; 
+            margin: 20px 0; 
+        }
+        .leaderboard { 
+            background: #2a2a2a; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border: 2px solid #333; 
+            margin-top: 20px; 
+        }
+        .leaderboard-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 8px; 
+            margin: 3px 0; 
+            background: #333; 
+            border-radius: 3px; 
+        }
+        .rank-1 { border-left: 3px solid #FFD700; }
+        .rank-2 { border-left: 3px solid #C0C0C0; }
+        .rank-3 { border-left: 3px solid #CD7F32; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Symbol Duel - 10 Account Test</h1>
+            <p>Test 10 accounts creating games and playing together</p>
+        </div>
+
+        <div class="test-area">
+            <div class="accounts-panel">
+                <h2>👥 Accounts (10/10)</h2>
+                <div id="accountsList">
+                    <!-- Accounts will be populated by JavaScript -->
+                </div>
+                <div class="controls">
+                    <button class="button" onclick="createAllAccounts()">Create 10 Accounts</button>
+                    <button class="button warning" onclick="resetAllAccounts()">Reset All</button>
+                </div>
+            </div>
+
+            <div class="games-panel">
+                <h2>🎯 Available Games</h2>
+                <div id="gamesList">
+                    <!-- Games will be populated by JavaScript -->
+                </div>
+                <div class="controls">
+                    <button class="button" onclick="createRandomGame()">Create Random Game</button>
+                    <button class="button warning" onclick="clearAllGames()">Clear All Games</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="results">
+            <h3>📊 Test Results</h3>
+            <div id="resultsList"></div>
+        </div>
+
+        <div class="leaderboard">
+            <h2>🏆 Live Leaderboard</h2>
+            <div id="leaderboardList">
+                <!-- Leaderboard will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test data
+        let accounts = [];
+        let games = [];
+        let gameCounter = 1;
+
+        const accountNames = [
+            'Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 
+            'Frank', 'Grace', 'Henry', 'Ivy', 'Jack'
+        ];
+
+        const gameTitles = [
+            '$10 Quick Game', '$15 Standard Game', '$20 High Stakes', 
+            '$25 Premium Game', '$30 Elite Challenge', '$35 Ultimate Battle'
+        ];
+
+        function createAllAccounts() {
+            addResult('🔐 Creating 10 test accounts...');
+            
+            accounts = [];
+            accountNames.forEach((name, index) => {
+                const account = {
+                    id: 'user-' + (index + 1),
+                    username: name,
+                    email: name.toLowerCase() + '@test.com',
+                    balance: 100.00,
+                    gamesPlayed: 0,
+                    gamesWon: 0,
+                    totalScore: 0,
+                    isOnline: true,
+                    currentGame: null
+                };
+                accounts.push(account);
+            });
+
+            updateAccountsDisplay();
+            updateLeaderboard();
+            addResult('✅ All 10 accounts created with $100 each');
+        }
+
+        function createRandomGame() {
+            if (accounts.length === 0) {
+                addResult('❌ Create accounts first!');
+                return;
+            }
+
+            const creator = accounts[Math.floor(Math.random() * accounts.length)];
+            const entryFee = [10, 15, 20, 25, 30, 35][Math.floor(Math.random() * 6)];
+            const maxPlayers = [3, 4, 5, 6][Math.floor(Math.random() * 4)];
+            const title = gameTitles[Math.floor(Math.random() * gameTitles.length)];
+
+            const game = {
+                id: 'game-' + gameCounter++,
+                title: title,
+                entryFee: entryFee,
+                maxPlayers: maxPlayers,
+                currentPlayers: 1,
+                status: 'lobby',
+                creator: creator.username,
+                creatorId: creator.id,
+                prizePool: entryFee * maxPlayers,
+                players: [creator.id],
+                createdAt: new Date()
+            };
+
+            games.push(game);
+            creator.currentGame = game.id;
+            creator.balance -= entryFee;
+
+            updateGamesDisplay();
+            updateAccountsDisplay();
+            addResult(`🎮 ${creator.username} created "${title}" - $${entryFee} entry, ${maxPlayers} max players`);
+        }
+
+        function joinGame(gameId, playerId) {
+            const game = games.find(g => g.id === gameId);
+            const player = accounts.find(a => a.id === playerId);
+
+            if (!game || !player) return;
+
+            if (game.currentPlayers >= game.maxPlayers) {
+                addResult(`❌ ${player.username} tried to join ${game.title} but it's full`);
+                return;
+            }
+
+            if (player.balance < game.entryFee) {
+                addResult(`❌ ${player.username} doesn't have enough money for ${game.title}`);
+                return;
+            }
+
+            game.players.push(playerId);
+            game.currentPlayers++;
+            player.balance -= game.entryFee;
+            player.currentGame = gameId;
+
+            if (game.currentPlayers >= 3) {
+                game.status = 'countdown';
+            }
+
+            updateGamesDisplay();
+            updateAccountsDisplay();
+            addResult(`👥 ${player.username} joined ${game.title} (${game.currentPlayers}/${game.maxPlayers} players)`);
+        }
+
+        function startGame(gameId) {
+            const game = games.find(g => g.id === gameId);
+            if (!game || game.currentPlayers < 3) return;
+
+            game.status = 'active';
+            addResult(`🚀 ${game.title} started with ${game.currentPlayers} players!`);
+
+            // Simulate game completion after 30 seconds
+            setTimeout(() => {
+                completeGame(gameId);
+            }, 30000);
+
+            updateGamesDisplay();
+        }
+
+        function completeGame(gameId) {
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            // Simulate game results
+            const gamePlayers = accounts.filter(a => game.players.includes(a.id));
+            gamePlayers.sort(() => Math.random() - 0.5); // Randomize order
+
+            const winner = gamePlayers[0];
+            winner.balance += game.prizePool;
+            winner.gamesWon++;
+            winner.totalScore += Math.floor(Math.random() * 100) + 50;
+
+            gamePlayers.forEach(player => {
+                player.gamesPlayed++;
+                player.currentGame = null;
+            });
+
+            game.status = 'completed';
+            addResult(`🏆 ${winner.username} won ${game.title} and received $${game.prizePool}!`);
+
+            updateGamesDisplay();
+            updateAccountsDisplay();
+            updateLeaderboard();
+        }
+
+        function updateAccountsDisplay() {
+            const accountsList = document.getElementById('accountsList');
+            accountsList.innerHTML = '';
+
+            accounts.forEach(account => {
+                const accountDiv = document.createElement('div');
+                accountDiv.className = 'account' + (account.currentGame ? ' playing' : '');
+                
+                const statusText = account.currentGame ? 
+                    `Playing: ${games.find(g => g.id === account.currentGame)?.title || 'Unknown'}` : 
+                    'Available';
+
+                accountDiv.innerHTML = `
+                    <div>
+                        <strong>${account.username}</strong><br>
+                        <small>$${account.balance.toFixed(2)} | ${statusText}</small>
+                    </div>
+                    <div>
+                        <button class="button small" onclick="createRandomGame()">Create</button>
+                        ${!account.currentGame ? `<button class="button small" onclick="joinRandomGame('${account.id}')">Join</button>` : ''}
+                    </div>
+                `;
+                accountsList.appendChild(accountDiv);
+            });
+        }
+
+        function updateGamesDisplay() {
+            const gamesList = document.getElementById('gamesList');
+            gamesList.innerHTML = '';
+
+            games.forEach(game => {
+                const gameDiv = document.createElement('div');
+                gameDiv.className = 'game-item ' + game.status;
+                
+                const canStart = game.status === 'countdown' && game.currentPlayers >= 3;
+                const canJoin = game.status === 'lobby' && game.currentPlayers < game.maxPlayers;
+
+                gameDiv.innerHTML = `
+                    <div>
+                        <strong>${game.title}</strong><br>
+                        <small>$${game.entryFee} entry | ${game.currentPlayers}/${game.maxPlayers} players | ${game.status}</small><br>
+                        <small>Prize Pool: $${game.prizePool} | Created by: ${game.creator}</small>
+                    </div>
+                    <div>
+                        ${canStart ? `<button class="button small" onclick="startGame('${game.id}')">Start</button>` : ''}
+                        ${canJoin ? `<button class="button small" onclick="joinRandomPlayer('${game.id}')">Join Random</button>` : ''}
+                    </div>
+                `;
+                gamesList.appendChild(gameDiv);
+            });
+        }
+
+        function updateLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = '';
+
+            const sortedAccounts = [...accounts]
+                .filter(a => a.gamesPlayed > 0)
+                .sort((a, b) => b.totalScore - a.totalScore);
+
+            sortedAccounts.forEach((account, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'leaderboard-item' + (index < 3 ? ' rank-' + (index + 1) : '');
+                itemDiv.innerHTML = `
+                    <span>${index + 1}. ${account.username}</span>
+                    <span>${account.totalScore} pts | $${account.balance.toFixed(2)} | ${account.gamesWon}/${account.gamesPlayed} wins</span>
+                `;
+                leaderboardList.appendChild(itemDiv);
+            });
+        }
+
+        function joinRandomGame(playerId) {
+            const availableGames = games.filter(g => 
+                g.status === 'lobby' && 
+                g.currentPlayers < g.maxPlayers && 
+                !g.players.includes(playerId)
+            );
+
+            if (availableGames.length === 0) {
+                addResult('❌ No available games to join');
+                return;
+            }
+
+            const randomGame = availableGames[Math.floor(Math.random() * availableGames.length)];
+            joinGame(randomGame.id, playerId);
+        }
+
+        function joinRandomPlayer(gameId) {
+            const availablePlayers = accounts.filter(a => 
+                !a.currentGame && 
+                a.balance >= games.find(g => g.id === gameId)?.entryFee
+            );
+
+            if (availablePlayers.length === 0) {
+                addResult('❌ No available players to join');
+                return;
+            }
+
+            const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
+            joinGame(gameId, randomPlayer.id);
+        }
+
+        function resetAllAccounts() {
+            accounts = [];
+            games = [];
+            gameCounter = 1;
+            updateAccountsDisplay();
+            updateGamesDisplay();
+            updateLeaderboard();
+            addResult('🔄 All accounts and games reset');
+        }
+
+        function clearAllGames() {
+            games = [];
+            gameCounter = 1;
+            accounts.forEach(account => {
+                account.currentGame = null;
+            });
+            updateGamesDisplay();
+            updateAccountsDisplay();
+            addResult('🗑️ All games cleared');
+        }
+
+        function addResult(message) {
+            const resultsList = document.getElementById('resultsList');
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item info';
+            resultItem.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            resultsList.appendChild(resultItem);
+            resultsList.scrollTop = resultsList.scrollHeight;
+        }
+
+        // Auto-start test on load
+        window.onload = function() {
+            setTimeout(() => {
+                addResult('🎮 10-account test environment loaded');
+                addResult('👥 Ready to create 10 test accounts');
+                addResult('🎯 Click "Create 10 Accounts" to begin testing');
+            }, 1000);
+        };
+    </script>
+</body>
+</html>

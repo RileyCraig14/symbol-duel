@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "name": "symbol-duel",
   "builds": [
     {
       "src": "package.json",
@@ -7,16 +8,33 @@
       "config": {
         "distDir": "build"
       }
+    },
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "dest": "server.js"
     },
     {
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "REACT_APP_SUPABASE_URL": "https://vegzvwfceqcqnqujkaji.supabase.co",
+    "REACT_APP_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlZ3p2d2ZjZXFjcW5xdWprYWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDU1NzAsImV4cCI6MjA3MDc4MTU3MH0.QNfU9Pdm05Zyr5oLegPrztSZI9DDSghMHHv49HLYEVc",
+    "REACT_APP_STRIPE_PUBLISHABLE_KEY": "pk_live_51KnY2IBN2FMJdfxFCYBRR3cntr5oe6fj2wSWMIjnpVQ9loZgUWg0SmORk0n8weQKhd3GyH4OZzw3LX0XrDuR6cWm008EDyoGPJ",
+    "STRIPE_SECRET_KEY": "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"
+  },
+  "functions": {
+    "server.js": {
+      "maxDuration": 30
+    }
+  },
+  "regions": ["iad1"],
+  "public": true
 }

@@ -1,0 +1,35 @@
+# Symbol Duel Production Environment Variables
+# Copy this file to .env.production and fill in your actual values
+
+# Supabase Configuration
+REACT_APP_SUPABASE_URL=https://vegzvwfceqcqnqujkaji.supabase.co
+REACT_APP_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlZ3p2d2ZjZXFjcW5xdWprYWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDU1NzAsImV4cCI6MjA3MDc4MTU3MH0.QNfU9Pdm05Zyr5oLegPrztSZI9DDSghMHHv49HLYEVc
+
+# Stripe Configuration (Replace with your actual keys)
+REACT_APP_STRIPE_PUBLISHABLE_KEY=pk_live_your_publishable_key_here
+STRIPE_SECRET_KEY=sk_live_your_secret_key_here
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+
+# App Configuration
+REACT_APP_APP_NAME=Symbol Duel
+REACT_APP_APP_URL=https://your-domain.vercel.app
+REACT_APP_API_URL=https://your-domain.vercel.app/api
+
+# Database Configuration (Optional - for direct database access)
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlZ3p2d2ZjZXFjcW5xdWprYWppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTIwNTU3MCwiZXhwIjoyMDcwNzgxNTcwfQ.Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8
+
+# Legal Compliance
+REACT_APP_MINIMUM_AGE=18
+REACT_APP_PLATFORM_FEE_PERCENTAGE=6
+REACT_APP_RESTRICTED_STATES=WA,ID,MT,OR,SD,DE,CT,IA,LA,ME,SC,TN
+
+# Game Configuration
+REACT_APP_MIN_ENTRY_FEE=1.00
+REACT_APP_MAX_ENTRY_FEE=1000.00
+REACT_APP_DEFAULT_GAME_TIMEOUT=300
+REACT_APP_MAX_PLAYERS_PER_GAME=10
+
+# Security
+REACT_APP_ENABLE_COMPLIANCE_CHECKS=true
+REACT_APP_ENABLE_AGE_VERIFICATION=true
+REACT_APP_ENABLE_LOCATION_VERIFICATION=true

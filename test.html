@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbol Duel - Multiplayer Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-button.danger {
+            background: #dc3545;
+        }
+        .test-button.danger:hover {
+            background: #c82333;
+        }
+        .test-button.success {
+            background: #28a745;
+        }
+        .test-button.success:hover {
+            background: #218838;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Symbol Duel - Multiplayer Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>🔌 Connection Tests</h2>
+        <button class="test-button" onclick="testConnection()">Test Supabase Connection</button>
+        <div id="connection-status"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>👥 Account Tests</h2>
+        <button class="test-button" onclick="createTestAccounts()">Create Test Accounts</button>
+        <button class="test-button danger" onclick="cleanupTestData()">Cleanup Test Data</button>
+        <div id="account-status"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎮 Game Tests</h2>
+        <button class="test-button" onclick="createTestGame()">Create Test Game</button>
+        <button class="test-button" onclick="joinTestGame()">Join Test Game</button>
+        <button class="test-button" onclick="startTestGame()">Start Test Game</button>
+        <button class="test-button" onclick="checkGameStatus()">Check Game Status</button>
+        <div id="game-status"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📡 Real-time Tests</h2>
+        <button class="test-button" onclick="testRealTime()">Test Real-time Updates</button>
+        <button class="test-button danger" onclick="stopRealTime()">Stop Real-time</button>
+        <div id="realtime-status"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🚀 Full Test Suite</h2>
+        <button class="test-button success" onclick="runFullTest()">Run Complete Test Suite</button>
+        <div id="fulltest-status"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📝 Test Logs</h2>
+        <button class="test-button" onclick="clearLogs()">Clear Logs</button>
+        <div id="test-log" class="log"></div>
+    </div>
+
+    <script>
+        // Global variables for test state
+        let currentGameId = null;
+        let realtimeSubscription = null;
+        
+        // Logging function
+        function log(message) {
+            const logElement = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+        
+        // Status update function
+        function updateStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        // Test 1: Supabase Connection
+        async function testConnection() {
+            log('🔌 Testing Supabase connection...');
+            try {
+                const { data, error } = await supabase.from('games').select('count').limit(1);
+                if (error) throw error;
+                log('✅ Supabase connection successful');
+                updateStatus('connection-status', '✅ Connected to Supabase', 'success');
+            } catch (error) {
+                log('❌ Supabase connection failed: ' + error.message);
+                updateStatus('connection-status', '❌ Connection failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Test 2: Create Test Accounts
+        async function createTestAccounts() {
+            log('👥 Creating test accounts...');
+            const testUsers = [
+                { id: 'test-user-1', username: 'TestPlayer1', email: 'test1@symbolduel.com' },
+                { id: 'test-user-2', username: 'TestPlayer2', email: 'test2@symbolduel.com' },
+                { id: 'test-user-3', username: 'TestPlayer3', email: 'test3@symbolduel.com' }
+            ];
+            
+            let successCount = 0;
+            for (const user of testUsers) {
+                try {
+                    const { data, error } = await supabase
+                        .from('players')
+                        .upsert([user], { onConflict: 'user_id' })
+                        .select();
+                    
+                    if (error) throw error;
+                    log(`✅ Created/Updated player: ${user.username}`);
+                    successCount++;
+                } catch (error) {
+                    log(`❌ Failed to create player ${user.username}: ${error.message}`);
+                }
+            }
+            
+            if (successCount === testUsers.length) {
+                updateStatus('account-status', `✅ All ${successCount} test accounts created`, 'success');
+            } else {
+                updateStatus('account-status', `⚠️ ${successCount}/${testUsers.length} accounts created`, 'error');
+            }
+        }
+        
+        // Test 3: Create Test Game
+        async function createTestGame() {
+            log('🎮 Creating test game...');
+            try {
+                const gameData = {
+                    title: 'Test Multiplayer Game',
+                    description: 'Testing multiplayer functionality',
+                    entry_fee: 25.00,
+                    max_players: 6,
+                    creator_id: 'test-user-1'
+                };
+                
+                const { data, error } = await supabase
+                    .from('games')
+                    .insert([gameData])
+                    .select()
+                    .single();
+                
+                if (error) throw error;
+                currentGameId = data.id;
+                log('✅ Test game created: ' + data.id);
+                updateStatus('game-status', `✅ Game created: ${data.title}`, 'success');
+            } catch (error) {
+                log('❌ Failed to create test game: ' + error.message);
+                updateStatus('game-status', '❌ Game creation failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Test 4: Join Test Game
+        async function joinTestGame() {
+            if (!currentGameId) {
+                log('❌ No game to join. Create a game first.');
+                return;
+            }
+            
+            log('🚪 Joining test game...');
+            try {
+                // Join with player 2
+                const { data, error } = await supabase
+                    .rpc('join_game_simple', {
+                        game_uuid: currentGameId,
+                        player_uuid: 'test-user-2'
+                    });
+                
+                if (error) throw error;
+                log('✅ Player 2 joined game');
+                
+                // Join with player 3
+                const { data: data2, error: error2 } = await supabase
+                    .rpc('join_game_simple', {
+                        game_uuid: currentGameId,
+                        player_uuid: 'test-user-3'
+                    });
+                
+                if (error2) throw error2;
+                log('✅ Player 3 joined game');
+                
+                updateStatus('game-status', '✅ All players joined successfully', 'success');
+            } catch (error) {
+                log('❌ Failed to join game: ' + error.message);
+                updateStatus('game-status', '❌ Join failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Test 5: Start Test Game
+        async function startTestGame() {
+            if (!currentGameId) {
+                log('❌ No game to start. Create a game first.');
+                return;
+            }
+            
+            log('🚀 Starting test game...');
+            try {
+                const { data, error } = await supabase
+                    .rpc('start_game_simple', {
+                        game_uuid: currentGameId
+                    });
+                
+                if (error) throw error;
+                log('✅ Game started successfully');
+                updateStatus('game-status', '✅ Game started successfully', 'success');
+            } catch (error) {
+                log('❌ Failed to start game: ' + error.message);
+                updateStatus('game-status', '❌ Start failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Test 6: Check Game Status
+        async function checkGameStatus() {
+            if (!currentGameId) {
+                log('❌ No game to check. Create a game first.');
+                return;
+            }
+            
+            log('📊 Checking game status...');
+            try {
+                const { data, error } = await supabase
+                    .from('games')
+                    .select(`
+                        *,
+                        game_players(
+                            player:players(username)
+                        )
+                    `)
+                    .eq('id', currentGameId)
+                    .single();
+                
+                if (error) throw error;
+                
+                const status = {
+                    id: data.id,
+                    status: data.status,
+                    current_players: data.current_players,
+                    max_players: data.max_players,
+                    players: data.game_players.map(gp => gp.player.username)
+                };
+                
+                log('✅ Game status: ' + JSON.stringify(status, null, 2));
+                updateStatus('game-status', `✅ Status: ${data.status}, Players: ${data.current_players}/${data.max_players}`, 'success');
+            } catch (error) {
+                log('❌ Failed to check game status: ' + error.message);
+                updateStatus('game-status', '❌ Status check failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Test 7: Real-time Updates
+        function testRealTime() {
+            if (!currentGameId) {
+                log('❌ No game to monitor. Create a game first.');
+                return;
+            }
+            
+            log('📡 Testing real-time subscriptions...');
+            
+            realtimeSubscription = supabase
+                .channel(`test-game:${currentGameId}`)
+                .on('postgres_changes', 
+                    { event: '*', schema: 'public', table: 'games', filter: `id=eq.${currentGameId}` },
+                    (payload) => {
+                        log('🔄 Real-time game update: ' + JSON.stringify(payload, null, 2));
+                    }
+                )
+                .on('postgres_changes',
+                    { event: '*', schema: 'public', table: 'game_players', filter: `game_id=eq.${currentGameId}` },
+                    (payload) => {
+                        log('🔄 Real-time player update: ' + JSON.stringify(payload, null, 2));
+                    }
+                )
+                .subscribe();
+            
+            log('✅ Real-time subscription active');
+            updateStatus('realtime-status', '✅ Real-time monitoring active', 'success');
+        }
+        
+        // Stop Real-time
+        function stopRealTime() {
+            if (realtimeSubscription) {
+                realtimeSubscription.unsubscribe();
+                realtimeSubscription = null;
+                log('🛑 Real-time subscription stopped');
+                updateStatus('realtime-status', '🛑 Real-time monitoring stopped', 'info');
+            }
+        }
+        
+        // Cleanup Test Data
+        async function cleanupTestData() {
+            log('🧹 Cleaning up test data...');
+            try {
+                // Delete test games
+                const { error: gamesError } = await supabase
+                    .from('games')
+                    .delete()
+                    .eq('creator_id', 'test-user-1');
+                
+                if (gamesError) throw gamesError;
+                
+                // Delete test players
+                const { error: playersError } = await supabase
+                    .from('players')
+                    .delete()
+                    .in('user_id', ['test-user-1', 'test-user-2', 'test-user-3']);
+                
+                if (playersError) throw playersError;
+                
+                currentGameId = null;
+                log('✅ Test data cleaned up');
+                updateStatus('account-status', '✅ Test data cleaned up', 'success');
+                updateStatus('game-status', '✅ Test data cleaned up', 'success');
+            } catch (error) {
+                log('❌ Failed to cleanup test data: ' + error.message);
+                updateStatus('account-status', '❌ Cleanup failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Run Full Test Suite
+        async function runFullTest() {
+            log('🚀 STARTING COMPLETE TEST SUITE...\n');
+            
+            try {
+                // Test connection
+                await testConnection();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Create accounts
+                await createTestAccounts();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Create game
+                await createTestGame();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Join game
+                await joinTestGame();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Check status
+                await checkGameStatus();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Start real-time
+                testRealTime();
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Start game
+                await startTestGame();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Final status
+                await checkGameStatus();
+                
+                log('\n🎉 COMPLETE TEST SUITE FINISHED!');
+                updateStatus('fulltest-status', '🎉 All tests completed successfully!', 'success');
+                
+                // Cleanup after delay
+                setTimeout(async () => {
+                    stopRealTime();
+                    await cleanupTestData();
+                    log('🧹 Test cleanup completed');
+                }, 5000);
+                
+            } catch (error) {
+                log('❌ Test suite failed: ' + error.message);
+                updateStatus('fulltest-status', '❌ Test suite failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Clear logs
+        function clearLogs() {
+            document.getElementById('test-log').textContent = '';
+        }
+        
+        // Initialize
+        log('🧪 Multiplayer Test Suite Loaded');
+        log('📱 Open your browser console to see detailed logs');
+        log('🚀 Ready to test! Click "Run Complete Test Suite" to start');
+    </script>
+</body>
+</html>

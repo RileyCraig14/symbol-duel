@@ -1,4 +1,5 @@
-[
+{
+  "puzzles": [
 {"symbols": "⭐️💸", "answer": "starbucks"},
 {"symbols": "🍯🌖", "answer": "honeymoon"},
 {"symbols": "👑🐝", "answer": "queen bee"},
@@ -79,7 +80,6 @@
 {"symbols": "⚡🍕", "answer": "fast food"},
 {"symbols": "🍎👁️", "answer": "apple of my eye"},
 {"symbols": "🍬👁️", "answer": "eye candy"},
-
 {"symbols": "💡🏠", "answer": "light house"},
 {"symbols": "⏰🐦🪱", "answer": "early bird gets the worm"},
 {"symbols": "🇲🇽 MADE 🇲🇽", "answer": "made in mexico"},
@@ -101,6 +101,7 @@
 {"symbols": "🎯🏆", "answer": "target goal"},
 {"symbols": "🪲🛏️", "answer": "bed bug"},
 {"symbols": "🪞🧠", "answer": "mind mirror"},
+{"symbols": "😊🪞", "answer": "man in the mirror"},
 {"symbols": "🧠⚛️", "answer": "mind over matter"},
 {"symbols": "💤💡", "answer": "light sleeper"},
 {"symbols": "🐍🌱", "answer": "snake in the grass"},
@@ -181,7 +182,7 @@
 {"symbols": "🕶️😎", "answer": "cool shades"},
 {"symbols": "🧭🗺️", "answer": "lost and found"},
 {"symbols": "🏹❤️", "answer": "love struck"},
-{"symbols": "🧭➡️🏡", "answer": "homeward bound"},
+{"symbols": "➡️🏡", "answer": "homeward bound"},
 {"symbols": "🧩🧠", "answer": "puzzle brain"},
 {"symbols": "🎬🍿🌙", "answer": "movie night"},
 {"symbols": "📺🔁", "answer": "rerun"},
@@ -197,11 +198,11 @@
 {"symbols": "🧯🔥", "answer": "put out the fire"},
 {"symbols": "🍞🐜", "answer": "bread and butter"},
 {"symbols": "🎒🏫", "answer": "school bag"},
-{"symbols": "✈️🧭", "answer": "fly by night"},
+{"symbols": "✈️🌙", "answer": "fly by night"},
 {"symbols": "🔒🔑", "answer": "key to the lock"},
 {"symbols": "🔑❤️", "answer": "key to my heart"},
 {"symbols": "📈📉", "answer": "market swing"},
-{"symbols": "🦶🌋", "answer": "footloose"},
+{"symbols": "🦶image of something shaking", "answer": "footloose"},
 {"symbols": "🏆🥇", "answer": "top prize"},
 {"symbols": "📦➡️🏠", "answer": "home delivery"},
 {"symbols": "🪓🌲", "answer": "lumberjack"},
@@ -325,5 +326,10 @@
 {"symbols": "🥔🔨", "answer": "mashed potatoes"},
 {"symbols": "🦀🍽️", "answer": "seafood"},
 {"symbols": "🏔️🧗", "answer": "mountain climbing"},
-{"symbols": "🍉🥤", "answer": "watermelon juice"}
-]
+{"symbols": "🍉🥤", "answer": "watermelon juice"},
+{"symbols": "🐜👖", "answer": "ants in the pants"},
+{"symbols": "🚪🚪", "answer": "door to door"},
+{"symbols": "🏠🍭🏠", "answer": "home sweet home"},
+{"symbols": "🐦✋", "answer": "bird in the hand"}
+  ]
+}

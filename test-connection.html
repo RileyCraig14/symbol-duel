@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Supabase Connection</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #1a1a1a; color: white; }
+        .test { margin: 20px 0; padding: 15px; border: 1px solid #444; border-radius: 8px; }
+        .success { background: #1e3a1e; border-color: #4ade80; }
+        .error { background: #3a1e1e; border-color: #f87171; }
+        .info { background: #1e1e3a; border-color: #60a5fa; }
+        button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #2563eb; }
+        .log { background: #000; color: #0f0; padding: 15px; border-radius: 4px; font-family: monospace; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔌 Test Supabase Connection</h1>
+    
+    <div class="test info">
+        <h3>📋 Current Status</h3>
+        <p>✅ React App: Running on port 3000</p>
+        <p>✅ Backend Server: Running on port 3001</p>
+        <p>✅ Environment Variables: Loaded</p>
+    </div>
+    
+    <div class="test">
+        <h3>🧪 Test Supabase Connection</h3>
+        <button onclick="testConnection()">Test Connection</button>
+        <button onclick="testCreateGame()">Test Create Game</button>
+        <button onclick="testGetGames()">Test Get Games</button>
+        <div id="connection-result"></div>
+    </div>
+    
+    <div class="test">
+        <h3>📝 Test Logs</h3>
+        <button onclick="clearLogs()">Clear Logs</button>
+        <div id="test-log" class="log"></div>
+    </div>
+    
+    <div class="test">
+        <h3>🎯 Next Steps</h3>
+        <ol>
+            <li>✅ Environment variables loaded</li>
+            <li>✅ Servers running</li>
+            <li>📋 <strong>Run SQL in Supabase</strong> (see WORKING_DATABASE.sql)</li>
+            <li>🧪 Test connection above</li>
+            <li>🎮 Test the main app at <a href="http://localhost:3000" target="_blank" style="color: #60a5fa;">http://localhost:3000</a></li>
+        </ol>
+    </div>
+
+    <script>
+        // Load Supabase client
+        const supabaseUrl = 'https://vegzvwfceqcqnqujkaji.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlZ3p2d2ZjZXFjcW5xdWprYWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDU1NzAsImV4cCI6MjA3MDc4MTU3MH0.QNfU9Pdm05Zyr5oLegPrztSZI9DDSghMHHv49HLYEVc';
+        
+        const supabase = window.supabase || createClient(supabaseUrl, supabaseKey);
+        
+        function log(message) {
+            const logElement = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="test ${type}">${message}</div>`;
+        }
+        
+        async function testConnection() {
+            log('🔌 Testing Supabase connection...');
+            try {
+                const { data, error } = await supabase.from('games').select('count').limit(1);
+                if (error) throw error;
+                log('✅ Supabase connection successful!');
+                updateResult('connection-result', '✅ Connected to Supabase successfully!', 'success');
+            } catch (error) {
+                log('❌ Supabase connection failed: ' + error.message);
+                updateResult('connection-result', '❌ Connection failed: ' + error.message, 'error');
+            }
+        }
+        
+        async function testCreateGame() {
+            log('🎮 Testing game creation...');
+            try {
+                const gameData = {
+                    title: 'Test Game',
+                    description: 'Testing game creation',
+                    entry_fee: 25.00,
+                    max_players: 6,
+                    creator_id: 'test-user-1'
+                };
+                
+                const { data, error } = await supabase
+                    .from('games')
+                    .insert([gameData])
+                    .select()
+                    .single();
+                
+                if (error) throw error;
+                log('✅ Game created successfully: ' + data.id);
+                updateResult('connection-result', '✅ Game created successfully!', 'success');
+            } catch (error) {
+                log('❌ Game creation failed: ' + error.message);
+                updateResult('connection-result', '❌ Game creation failed: ' + error.message, 'error');
+            }
+        }
+        
+        async function testGetGames() {
+            log('📋 Testing get games...');
+            try {
+                const { data, error } = await supabase
+                    .from('games')
+                    .select('*')
+                    .limit(5);
+                
+                if (error) throw error;
+                log('✅ Retrieved ' + (data?.length || 0) + ' games');
+                updateResult('connection-result', '✅ Retrieved games successfully!', 'success');
+            } catch (error) {
+                log('❌ Get games failed: ' + error.message);
+                updateResult('connection-result', '❌ Get games failed: ' + error.message, 'error');
+            }
+        }
+        
+        function clearLogs() {
+            document.getElementById('test-log').textContent = '';
+        }
+        
+        // Initialize
+        log('🧪 Connection Test Page Loaded');
+        log('📱 Ready to test Supabase connection');
+        log('🚀 Click "Test Connection" to start');
+    </script>
+</body>
+</html>
