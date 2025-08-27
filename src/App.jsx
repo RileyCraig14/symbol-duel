@@ -8,33 +8,18 @@ import PracticeMode from './components/PracticeMode';
 import AuthForm from './components/AuthForm';
 import './styles/theme.css';
 
-// Use real Supabase for production
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+// Force use real Supabase for production
+const realSupabase = require('./utils/realSupabase');
+const supabase = realSupabase.supabase;
+const realtimeProfileService = realSupabase.realtimeProfileService;
+// eslint-disable-next-line no-unused-vars
+const realtimeGameService = realSupabase.realtimeGameService;
+// eslint-disable-next-line no-unused-vars
+const realtimeLeaderboardService = realSupabase.realtimeLeaderboardService;
 
-let supabase, realtimeProfileService, realtimeGameService, realtimeLeaderboardService;
-
-if (supabaseUrl && supabaseKey && supabaseUrl !== 'your-supabase-url' && supabaseKey !== 'your-supabase-anon-key') {
-  // Use real Supabase
-  const realSupabase = require('./utils/realSupabase');
-  supabase = realSupabase.supabase;
-  realtimeProfileService = realSupabase.realtimeProfileService;
-  // eslint-disable-next-line no-unused-vars
-  realtimeGameService = realSupabase.realtimeGameService;
-  // eslint-disable-next-line no-unused-vars
-  realtimeLeaderboardService = realSupabase.realtimeLeaderboardService;
-  console.log('✅ Using real Supabase for production');
-} else {
-  // Use local system for development
-  const localSupabase = require('./utils/localSupabase');
-  supabase = localSupabase.supabase;
-  realtimeProfileService = localSupabase.realtimeProfileService;
-  // eslint-disable-next-line no-unused-vars
-  realtimeGameService = localSupabase.realtimeGameService;
-  // eslint-disable-next-line no-unused-vars
-  realtimeLeaderboardService = localSupabase.realtimeLeaderboardService;
-  console.log('🔄 Using local system for development');
-}
+console.log('✅ Using real Supabase for production');
+console.log('Supabase URL:', process.env.REACT_APP_SUPABASE_URL);
+console.log('Supabase Key:', process.env.REACT_APP_SUPABASE_ANON_KEY ? 'Present' : 'Missing');
 
 function App() {
   const [user, setUser] = useState(null);
