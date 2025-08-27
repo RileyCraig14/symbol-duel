@@ -31,6 +31,16 @@ const IndividualGameSystem = ({ user, userProfile, onGameStart }) => {
     };
   }, []);
 
+  // Update countdown every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Force re-render to update countdown timers
+      setAvailableGames(prev => [...prev]);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const loadAvailableGames = async () => {
     try {
       const games = await realtimeGameService.getAvailableGames();
@@ -86,12 +96,14 @@ const IndividualGameSystem = ({ user, userProfile, onGameStart }) => {
 
   const handleJoinGame = async (gameId) => {
     try {
+      console.log('🎮 Attempting to join game:', gameId);
       await realtimeGameService.joinGame(gameId);
       await loadAvailableGames();
       alert('Successfully joined the game!');
     } catch (error) {
-      console.error('Error joining game:', error);
-      alert(error.message || 'Failed to join game');
+      console.error('❌ Error joining game:', error);
+      console.error('❌ Error details:', error.message);
+      alert(`Failed to join game: ${error.message}`);
     }
   };
 
@@ -128,13 +140,25 @@ const IndividualGameSystem = ({ user, userProfile, onGameStart }) => {
   };
 
   const getGameStatus = (game) => {
-    if (game.status === 'countdown') return 'Starting soon!';
+    if (game.game_status === 'countdown') {
+      if (game.game_start_time) {
+        const now = new Date();
+        const startTime = new Date(game.game_start_time);
+        const timeLeft = Math.max(0, Math.ceil((startTime - now) / 1000));
+        return `Starting in ${timeLeft}s`;
+      }
+      return 'Starting soon!';
+    }
+    if (game.game_status === 'active') return 'Game Active';
+    if (game.game_status === 'completed') return 'Completed';
     if (game.current_players >= game.max_players) return 'Game Full';
     return 'Waiting for Players';
   };
 
   const getStatusColor = (game) => {
-    if (game.status === 'countdown') return 'text-yellow-400';
+    if (game.game_status === 'countdown') return 'text-yellow-400';
+    if (game.game_status === 'active') return 'text-blue-400';
+    if (game.game_status === 'completed') return 'text-gray-400';
     if (game.current_players >= game.max_players) return 'text-red-400';
     return 'text-green-400';
   };
@@ -304,11 +328,13 @@ const IndividualGameSystem = ({ user, userProfile, onGameStart }) => {
                 
                 <button
                   onClick={() => handleJoinGame(game.id)}
-                  disabled={game.current_players >= game.max_players || game.status === 'countdown'}
+                  disabled={game.current_players >= game.max_players || game.game_status === 'countdown' || game.game_status === 'active' || game.game_status === 'completed'}
                   className="w-full btn btn-primary mb-2"
                 >
                   {game.current_players >= game.max_players ? 'Game Full' : 
-                   game.status === 'countdown' ? 'Starting Soon' : 'Quick Join'}
+                   game.game_status === 'countdown' ? 'Starting Soon' : 
+                   game.game_status === 'active' ? 'Game Active' :
+                   game.game_status === 'completed' ? 'Completed' : 'Quick Join'}
                 </button>
                 
                 {/* Start Game button for joined players */}
