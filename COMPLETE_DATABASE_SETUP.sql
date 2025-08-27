@@ -1,18 +1,17 @@
--- WORKING DATABASE SETUP - Tested and Verified
--- Run this in your Supabase SQL Editor
+-- COMPLETE SYMBOL DUEL DATABASE SETUP
+-- This is the final, working version
 
--- Enable extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- Drop existing tables if they exist (for clean setup)
+-- Drop everything first to start completely clean
 DROP TABLE IF EXISTS public.player_answers CASCADE;
 DROP TABLE IF EXISTS public.game_rounds CASCADE;
 DROP TABLE IF EXISTS public.game_players CASCADE;
 DROP TABLE IF EXISTS public.games CASCADE;
 DROP TABLE IF EXISTS public.profiles CASCADE;
 DROP VIEW IF EXISTS public.leaderboard CASCADE;
+DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
+DROP FUNCTION IF EXISTS public.update_player_stats() CASCADE;
 
--- Create profiles table with all required columns
+-- Create profiles table
 CREATE TABLE public.profiles (
     id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
@@ -87,43 +86,35 @@ CREATE TABLE public.player_answers (
     submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create indexes for performance
-CREATE INDEX idx_games_status ON public.games(status);
-CREATE INDEX idx_games_created_at ON public.games(created_at);
-CREATE INDEX idx_games_creator_id ON public.games(creator_id);
-CREATE INDEX idx_game_players_game_id ON public.game_players(game_id);
-CREATE INDEX idx_game_players_player_id ON public.game_players(player_id);
-CREATE INDEX idx_profiles_username ON public.profiles(username);
-CREATE INDEX idx_profiles_total_score ON public.profiles(total_score);
-
--- Enable Row Level Security
+-- Enable Row Level Security on tables only (NOT views)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.game_players ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.game_rounds ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.player_answers ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
+-- Create RLS policies for profiles
 CREATE POLICY "Users can view all profiles" ON public.profiles FOR SELECT USING (true);
 CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
+-- Create RLS policies for games
 CREATE POLICY "Users can view all games" ON public.games FOR SELECT USING (true);
 CREATE POLICY "Users can create games" ON public.games FOR INSERT WITH CHECK (auth.uid() = creator_id);
 CREATE POLICY "Game creators can update their games" ON public.games FOR UPDATE USING (auth.uid() = creator_id);
 
+-- Create RLS policies for game_players
 CREATE POLICY "Users can view all game players" ON public.game_players FOR SELECT USING (true);
 CREATE POLICY "Users can join games" ON public.game_players FOR INSERT WITH CHECK (auth.uid() = player_id);
 CREATE POLICY "Users can leave games" ON public.game_players FOR DELETE USING (auth.uid() = player_id);
 
+-- Create RLS policies for game_rounds
 CREATE POLICY "Users can view game rounds" ON public.game_rounds FOR SELECT USING (true);
 CREATE POLICY "Game creators can manage rounds" ON public.game_rounds FOR ALL USING (
-    EXISTS (
-        SELECT 1 FROM public.games 
-        WHERE id = game_id AND creator_id = auth.uid()
-    )
+    EXISTS (SELECT 1 FROM public.games WHERE id = game_id AND creator_id = auth.uid())
 );
 
+-- Create RLS policies for player_answers
 CREATE POLICY "Users can view all answers" ON public.player_answers FOR SELECT USING (true);
 CREATE POLICY "Users can submit their own answers" ON public.player_answers FOR INSERT WITH CHECK (auth.uid() = player_id);
 
@@ -143,7 +134,6 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger to create profile on user signup
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
@@ -167,12 +157,11 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger to update stats when game player completes
-DROP TRIGGER IF EXISTS on_game_player_complete ON public.game_players;
 CREATE TRIGGER on_game_player_complete
     AFTER UPDATE OF final_score, final_rank, winnings ON public.game_players
     FOR EACH ROW EXECUTE FUNCTION public.update_player_stats();
 
--- Create leaderboard view
+-- Create leaderboard view (NO RLS on views - they inherit from underlying tables)
 CREATE VIEW public.leaderboard AS
 SELECT 
     p.id,
@@ -192,14 +181,5 @@ FROM public.profiles p
 WHERE p.games_played > 0
 ORDER BY p.total_score DESC;
 
--- Insert sample data for testing
-INSERT INTO public.profiles (id, username, email, account_balance, games_played, games_won, total_score)
-VALUES 
-    (uuid_generate_v4(), 'TestPlayer1', 'test1@example.com', 150.00, 5, 3, 1250),
-    (uuid_generate_v4(), 'TestPlayer2', 'test2@example.com', 200.00, 8, 4, 2100),
-    (uuid_generate_v4(), 'TestPlayer3', 'test3@example.com', 75.00, 3, 1, 800)
-ON CONFLICT (id) DO NOTHING;
-
--- Verify tables were created
-SELECT 'Tables created successfully' as status;
-SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;
+-- Success message
+SELECT 'Complete database setup successful! Ready for multiplayer gaming!' as status;

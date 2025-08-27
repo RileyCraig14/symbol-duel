@@ -19,7 +19,9 @@ if (supabaseUrl && supabaseKey && supabaseUrl !== 'your-supabase-url' && supabas
   const realSupabase = require('./utils/realSupabase');
   supabase = realSupabase.supabase;
   realtimeProfileService = realSupabase.realtimeProfileService;
+  // eslint-disable-next-line no-unused-vars
   realtimeGameService = realSupabase.realtimeGameService;
+  // eslint-disable-next-line no-unused-vars
   realtimeLeaderboardService = realSupabase.realtimeLeaderboardService;
   console.log('✅ Using real Supabase for production');
 } else {
@@ -27,7 +29,9 @@ if (supabaseUrl && supabaseKey && supabaseUrl !== 'your-supabase-url' && supabas
   const localSupabase = require('./utils/localSupabase');
   supabase = localSupabase.supabase;
   realtimeProfileService = localSupabase.realtimeProfileService;
+  // eslint-disable-next-line no-unused-vars
   realtimeGameService = localSupabase.realtimeGameService;
+  // eslint-disable-next-line no-unused-vars
   realtimeLeaderboardService = localSupabase.realtimeLeaderboardService;
   console.log('🔄 Using local system for development');
 }

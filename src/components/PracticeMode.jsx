@@ -83,7 +83,7 @@ const PracticeMode = ({ user, onBack }) => {
 
       return () => clearTimeout(timer);
     }
-  }, [showAnswer, currentPuzzleIndex]);
+  }, [showAnswer, currentPuzzleIndex, nextPuzzle]);
 
   const handleTimeUp = () => {
     setIsActive(false);
