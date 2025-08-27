@@ -8,17 +8,9 @@
       "config": {
         "distDir": "build"
       }
-    },
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "server.js"
-    },
     {
       "src": "/(.*)",
       "dest": "/index.html"
@@ -27,11 +19,6 @@
   "env": {
     "REACT_APP_SUPABASE_URL": "https://vegzvwfceqcqnqujkaji.supabase.co",
     "REACT_APP_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlZ3p2d2ZjZXFjcW5xdWprYWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDU1NzAsImV4cCI6MjA3MDc4MTU3MH0.QNfU9Pdm05Zyr5oLegPrztSZI9DDSghMHHv49HLYEVc"
-  },
-  "functions": {
-    "server.js": {
-      "maxDuration": 30
-    }
   },
   "regions": ["iad1"],
   "public": true
