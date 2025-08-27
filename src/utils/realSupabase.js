@@ -16,8 +16,16 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
 export const realtimeGameService = {
   // Create a new game
   async createGame(gameData) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+    // Try to get current session first
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      // If no session, try to get user directly
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+      var currentUser = user;
+    } else {
+      var currentUser = session.user;
+    }
 
     const { data, error } = await supabase
       .from('games')
@@ -26,7 +34,7 @@ export const realtimeGameService = {
         description: gameData.description,
         entry_fee: gameData.entryFee,
         max_players: gameData.maxPlayers,
-        creator_id: user.id,
+        creator_id: currentUser.id,
         creator_username: gameData.creatorUsername,
         prize_pool: gameData.entryFee * gameData.maxPlayers
       }])
@@ -59,14 +67,22 @@ export const realtimeGameService = {
 
   // Join a game
   async joinGame(gameId) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+    // Try to get current session first
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      // If no session, try to get user directly
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+      var currentUser = user;
+    } else {
+      var currentUser = session.user;
+    }
 
     // Get user profile
     const { data: profile } = await supabase
       .from('profiles')
       .select('username, account_balance')
-      .eq('id', user.id)
+      .eq('id', currentUser.id)
       .single();
 
     if (!profile) throw new Error('User profile not found');
@@ -87,7 +103,7 @@ export const realtimeGameService = {
       .from('game_players')
       .insert([{
         game_id: gameId,
-        player_id: user.id,
+        player_id: currentUser.id,
         player_username: profile.username
       }])
       .select()
@@ -113,7 +129,7 @@ export const realtimeGameService = {
         account_balance: profile.account_balance - game.entry_fee,
         total_deposits: profile.total_deposits + game.entry_fee
       })
-      .eq('id', user.id);
+      .eq('id', currentUser.id);
 
     if (balanceError) throw balanceError;
 
