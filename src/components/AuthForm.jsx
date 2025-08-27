@@ -1,17 +1,7 @@
 import React, { useState } from 'react';
-// Use real Supabase for production
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
-
-let supabase;
-
-if (supabaseUrl && supabaseKey && supabaseUrl !== 'your-supabase-url' && supabaseKey !== 'your-supabase-anon-key') {
-  const realSupabase = require('../utils/realSupabase');
-  supabase = realSupabase.supabase;
-} else {
-  const localSupabase = require('../utils/localSupabase');
-  supabase = localSupabase.supabase;
-}
+// Force use real Supabase for production
+const realSupabase = require('../utils/realSupabase');
+const supabase = realSupabase.supabase;
 
 const AuthForm = ({ onAuthSuccess }) => {
   const [isSignUp, setIsSignUp] = useState(false);

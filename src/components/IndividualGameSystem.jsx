@@ -1,19 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { getRandomPuzzles } from '../utils/puzzleGenerator';
 
-// Use real Supabase for production
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
-
-let realtimeGameService;
-
-if (supabaseUrl && supabaseKey && supabaseUrl !== 'your-supabase-url' && supabaseKey !== 'your-supabase-anon-key') {
-  const realSupabase = require('../utils/realSupabase');
-  realtimeGameService = realSupabase.realtimeGameService;
-} else {
-  const localSupabase = require('../utils/localSupabase');
-  realtimeGameService = localSupabase.realtimeGameService;
-}
+// Force use real Supabase for production
+const realSupabase = require('../utils/realSupabase');
+const realtimeGameService = realSupabase.realtimeGameService;
 
 const IndividualGameSystem = ({ user, userProfile, onGameStart }) => {
   const [showCreateGame, setShowCreateGame] = useState(false);
