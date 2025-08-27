@@ -221,6 +221,7 @@ function App() {
       setUserProfile(profile);
       
       console.log('✅ Auth success, profile loaded:', profile);
+      setCurrentView('home');
     } catch (error) {
       console.error('Error loading profile after auth success:', error);
       // Profile doesn't exist, create it manually
@@ -259,10 +260,12 @@ function App() {
           };
           setUserProfile(mockProfile);
           console.log('✅ Mock profile created for testing:', mockProfile);
+          setCurrentView('home');
         } else {
           console.log('✅ Profile created manually after auth success:', newProfile);
           setUserProfile(newProfile);
         }
+        setCurrentView('home');
       } catch (createError) {
         console.error('❌ Failed to create profile manually after auth success:', createError);
       }

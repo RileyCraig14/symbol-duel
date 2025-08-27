@@ -62,10 +62,13 @@ const AuthForm = ({ onAuthSuccess }) => {
           console.log('✅ User data:', data);
           console.log('✅ Session:', data.session);
           
-          // For testing, always proceed with signup
-          console.log('✅ Proceeding with signup (email confirmation bypassed for testing)');
-          // Profile will be created automatically by database trigger
+                  // For testing, always proceed with signup
+        console.log('✅ Proceeding with signup (email confirmation bypassed for testing)');
+        // Profile will be created automatically by database trigger
+        // Wait a bit longer for the database trigger to complete
+        setTimeout(() => {
           onAuthSuccess(data.user);
+        }, 2000);
         }
       } else {
         // Sign in validation
