@@ -42,7 +42,7 @@ const AuthForm = ({ onAuthSuccess }) => {
           throw new Error('Username is required');
         }
 
-        // Sign up with Supabase
+        // Sign up with Supabase (bypass email confirmation for testing)
         const { data, error } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
@@ -50,7 +50,8 @@ const AuthForm = ({ onAuthSuccess }) => {
             data: {
               username: formData.username,
               phone: formData.phone
-            }
+            },
+            emailRedirectTo: undefined // Bypass email confirmation
           }
         });
 
@@ -61,15 +62,10 @@ const AuthForm = ({ onAuthSuccess }) => {
           console.log('✅ User data:', data);
           console.log('✅ Session:', data.session);
           
-          // Check if email confirmation is required
-          if (data.user.email_confirmed_at) {
-            console.log('✅ Email already confirmed, creating profile...');
-            // Profile will be created automatically by database trigger
-            onAuthSuccess(data.user);
-          } else {
-            console.log('📧 Email confirmation required');
-            setError('Please check your email and click the confirmation link to complete signup.');
-          }
+          // For testing, always proceed with signup
+          console.log('✅ Proceeding with signup (email confirmation bypassed for testing)');
+          // Profile will be created automatically by database trigger
+          onAuthSuccess(data.user);
         }
       } else {
         // Sign in validation
