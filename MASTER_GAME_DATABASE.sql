@@ -6,12 +6,15 @@
 -- STEP 1: DROP ALL EXISTING OBJECTS (clean slate)
 -- =====================================================
 
--- Drop all triggers first
+-- Drop all triggers first (with CASCADE to handle dependencies)
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 DROP TRIGGER IF EXISTS trigger_start_countdown ON public.game_players;
 DROP TRIGGER IF EXISTS trigger_update_player_stats ON public.game_rounds;
 DROP TRIGGER IF EXISTS trigger_calculate_win_rate ON public.profiles;
 DROP TRIGGER IF EXISTS trigger_update_leaderboard ON public.profiles;
+DROP TRIGGER IF EXISTS on_game_player_complete ON public.game_players;
+DROP TRIGGER IF EXISTS on_profile_update ON public.profiles;
+DROP TRIGGER IF EXISTS on_game_complete ON public.games;
 
 -- Drop all functions
 DROP FUNCTION IF EXISTS public.handle_new_user();
@@ -169,62 +172,9 @@ CREATE TABLE IF NOT EXISTS public.player_answers (
     submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 6. TOURNAMENTS TABLE - Tournament events
-CREATE TABLE IF NOT EXISTS public.tournaments (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    entry_fee DECIMAL(10,2) NOT NULL,
-    max_participants INTEGER NOT NULL,
-    current_participants INTEGER DEFAULT 0,
-    prize_pool DECIMAL(10,2) NOT NULL,
-    start_date TIMESTAMP WITH TIME ZONE NOT NULL,
-    end_date TIMESTAMP WITH TIME ZONE,
-    status VARCHAR(20) DEFAULT 'upcoming', -- upcoming, active, completed, cancelled
-    tournament_type VARCHAR(20) DEFAULT 'single_elimination', -- single_elimination, double_elimination, round_robin
-    rounds_count INTEGER DEFAULT 1,
-    current_round INTEGER DEFAULT 0,
-    created_by UUID REFERENCES public.profiles(id),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+-- Tournament tables removed - not needed for this app
 
--- 7. TOURNAMENT_PARTICIPANTS TABLE - Players in tournaments
-CREATE TABLE IF NOT EXISTS public.tournament_participants (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tournament_id UUID REFERENCES public.tournaments(id) ON DELETE CASCADE,
-    player_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
-    player_username VARCHAR(50) NOT NULL,
-    joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    is_eliminated BOOLEAN DEFAULT FALSE,
-    final_rank INTEGER DEFAULT 0,
-    prize_amount DECIMAL(10,2) DEFAULT 0.00,
-    UNIQUE(tournament_id, player_id)
-);
-
--- 8. TOURNAMENT_MATCHES TABLE - Individual matches in tournaments
-CREATE TABLE IF NOT EXISTS public.tournament_matches (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tournament_id UUID REFERENCES public.tournaments(id) ON DELETE CASCADE,
-    round_number INTEGER NOT NULL,
-    match_number INTEGER NOT NULL,
-    player1_id UUID REFERENCES public.profiles(id),
-    player2_id UUID REFERENCES public.profiles(id),
-    winner_id UUID REFERENCES public.profiles(id),
-    puzzle_id VARCHAR(100) NOT NULL,
-    puzzle_text TEXT NOT NULL,
-    puzzle_answer VARCHAR(100) NOT NULL,
-    player1_answer VARCHAR(100),
-    player2_answer VARCHAR(100),
-    player1_time INTEGER,
-    player2_time INTEGER,
-    started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    completed_at TIMESTAMP WITH TIME ZONE,
-    is_completed BOOLEAN DEFAULT FALSE,
-    UNIQUE(tournament_id, round_number, match_number)
-);
-
--- 9. DAILY_CHALLENGES TABLE - Daily puzzle challenges
+-- 6. DAILY_CHALLENGES TABLE - Daily puzzle challenges
 CREATE TABLE IF NOT EXISTS public.daily_challenges (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     challenge_date DATE UNIQUE NOT NULL,
@@ -241,7 +191,7 @@ CREATE TABLE IF NOT EXISTS public.daily_challenges (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 10. DAILY_CHALLENGE_ATTEMPTS TABLE - Player attempts at daily challenges
+-- 7. DAILY_CHALLENGE_ATTEMPTS TABLE - Player attempts at daily challenges
 CREATE TABLE IF NOT EXISTS public.daily_challenge_attempts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     challenge_id UUID REFERENCES public.daily_challenges(id) ON DELETE CASCADE,
@@ -255,7 +205,7 @@ CREATE TABLE IF NOT EXISTS public.daily_challenge_attempts (
     UNIQUE(challenge_id, player_id, attempt_number)
 );
 
--- 11. CUSTOM_PUZZLES TABLE - User-created puzzles
+-- 8. CUSTOM_PUZZLES TABLE - User-created puzzles
 CREATE TABLE IF NOT EXISTS public.custom_puzzles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     creator_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -272,7 +222,7 @@ CREATE TABLE IF NOT EXISTS public.custom_puzzles (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 12. PRACTICE_SESSIONS TABLE - Individual practice sessions
+-- 9. PRACTICE_SESSIONS TABLE - Individual practice sessions
 CREATE TABLE IF NOT EXISTS public.practice_sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     player_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -286,7 +236,7 @@ CREATE TABLE IF NOT EXISTS public.practice_sessions (
     is_completed BOOLEAN DEFAULT FALSE
 );
 
--- 13. PRACTICE_ANSWERS TABLE - Answers in practice sessions
+-- 10. PRACTICE_ANSWERS TABLE - Answers in practice sessions
 CREATE TABLE IF NOT EXISTS public.practice_answers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     session_id UUID REFERENCES public.practice_sessions(id) ON DELETE CASCADE,
@@ -300,7 +250,7 @@ CREATE TABLE IF NOT EXISTS public.practice_answers (
     submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 14. PAYMENT_HISTORY TABLE - Track all financial transactions
+-- 11. PAYMENT_HISTORY TABLE - Track all financial transactions
 CREATE TABLE IF NOT EXISTS public.payment_history (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     player_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -309,14 +259,13 @@ CREATE TABLE IF NOT EXISTS public.payment_history (
     balance_before DECIMAL(10,2) NOT NULL,
     balance_after DECIMAL(10,2) NOT NULL,
     game_id UUID REFERENCES public.games(id),
-    tournament_id UUID REFERENCES public.tournaments(id),
     stripe_payment_intent_id VARCHAR(255),
     status VARCHAR(20) DEFAULT 'pending', -- pending, completed, failed, cancelled
     description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 15. LEGAL_AGREEMENTS TABLE - Track user agreements
+-- 12. LEGAL_AGREEMENTS TABLE - Track user agreements
 CREATE TABLE IF NOT EXISTS public.legal_agreements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     player_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -327,7 +276,7 @@ CREATE TABLE IF NOT EXISTS public.legal_agreements (
     user_agent TEXT
 );
 
--- 16. NOTIFICATIONS TABLE - User notifications
+-- 13. NOTIFICATIONS TABLE - User notifications
 CREATE TABLE IF NOT EXISTS public.notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     player_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -336,7 +285,6 @@ CREATE TABLE IF NOT EXISTS public.notifications (
     notification_type VARCHAR(20) DEFAULT 'info', -- info, success, warning, error
     is_read BOOLEAN DEFAULT FALSE,
     related_game_id UUID REFERENCES public.games(id),
-    related_tournament_id UUID REFERENCES public.tournaments(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -349,10 +297,7 @@ ALTER TABLE public.games
 ADD CONSTRAINT games_game_status_check 
 CHECK (game_status IN ('waiting', 'countdown', 'active', 'completed', 'cancelled'));
 
--- Tournament status constraints
-ALTER TABLE public.tournaments 
-ADD CONSTRAINT tournaments_status_check 
-CHECK (status IN ('upcoming', 'active', 'completed', 'cancelled'));
+-- Tournament constraints removed - not needed
 
 -- Daily challenge status constraints
 ALTER TABLE public.daily_challenges 
@@ -395,13 +340,10 @@ SELECT
     p.last_active,
     p.created_at,
     COUNT(DISTINCT gp.game_id) as games_joined,
-    COUNT(DISTINCT t.id) as tournaments_joined,
     COUNT(DISTINCT dc.id) as daily_challenges_completed,
     COUNT(DISTINCT cp.id) as custom_puzzles_created
 FROM public.profiles p
 LEFT JOIN public.game_players gp ON p.id = gp.player_id
-LEFT JOIN public.tournament_participants tp ON p.id = tp.player_id
-LEFT JOIN public.tournaments t ON tp.tournament_id = t.id
 LEFT JOIN public.daily_challenge_attempts dca ON p.id = dca.player_id
 LEFT JOIN public.daily_challenges dc ON dca.challenge_id = dc.id AND dca.is_correct = true
 LEFT JOIN public.custom_puzzles cp ON p.id = cp.creator_id
@@ -427,21 +369,7 @@ FROM public.games g
 JOIN public.game_players gp ON g.id = gp.game_id
 ORDER BY g.created_at DESC;
 
--- 4. TOURNAMENT_STANDINGS VIEW - Tournament rankings
-CREATE OR REPLACE VIEW public.tournament_standings AS
-SELECT 
-    t.id as tournament_id,
-    t.name,
-    t.status,
-    tp.player_id,
-    tp.player_username,
-    tp.final_rank,
-    tp.prize_amount,
-    t.prize_pool,
-    t.start_date
-FROM public.tournaments t
-JOIN public.tournament_participants tp ON t.id = tp.tournament_id
-ORDER BY t.start_date DESC, tp.final_rank ASC;
+-- Tournament standings view removed - not needed
 
 -- =====================================================
 -- STEP 5: CREATE ALL FUNCTIONS
@@ -716,9 +644,7 @@ ALTER TABLE public.games ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.game_players ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.game_rounds ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.player_answers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.tournaments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.tournament_participants ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.tournament_matches ENABLE ROW LEVEL SECURITY;
+-- Tournament RLS removed - not needed
 ALTER TABLE public.daily_challenges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.daily_challenge_attempts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.custom_puzzles ENABLE ROW LEVEL SECURITY;
@@ -753,20 +679,7 @@ CREATE POLICY "player_answers_select_all" ON public.player_answers FOR SELECT US
 CREATE POLICY "player_answers_insert_own" ON public.player_answers FOR INSERT WITH CHECK (auth.uid() = player_id);
 CREATE POLICY "player_answers_update_own" ON public.player_answers FOR UPDATE USING (auth.uid() = player_id);
 
--- Tournaments policies
-CREATE POLICY "tournaments_select_all" ON public.tournaments FOR SELECT USING (true);
-CREATE POLICY "tournaments_insert_all" ON public.tournaments FOR INSERT WITH CHECK (true);
-CREATE POLICY "tournaments_update_all" ON public.tournaments FOR UPDATE USING (true);
-
--- Tournament participants policies
-CREATE POLICY "tournament_participants_select_all" ON public.tournament_participants FOR SELECT USING (true);
-CREATE POLICY "tournament_participants_insert_all" ON public.tournament_participants FOR INSERT WITH CHECK (true);
-CREATE POLICY "tournament_participants_update_own" ON public.tournament_participants FOR UPDATE USING (auth.uid() = player_id);
-
--- Tournament matches policies
-CREATE POLICY "tournament_matches_select_all" ON public.tournament_matches FOR SELECT USING (true);
-CREATE POLICY "tournament_matches_insert_all" ON public.tournament_matches FOR INSERT WITH CHECK (true);
-CREATE POLICY "tournament_matches_update_all" ON public.tournament_matches FOR UPDATE USING (true);
+-- Tournament policies removed - not needed
 
 -- Daily challenges policies
 CREATE POLICY "daily_challenges_select_all" ON public.daily_challenges FOR SELECT USING (true);
@@ -833,14 +746,7 @@ CREATE INDEX idx_game_rounds_number ON public.game_rounds(game_id, round_number)
 CREATE INDEX idx_player_answers_round_id ON public.player_answers(round_id);
 CREATE INDEX idx_player_answers_player_id ON public.player_answers(player_id);
 
-CREATE INDEX idx_tournaments_status ON public.tournaments(status);
-CREATE INDEX idx_tournaments_start_date ON public.tournaments(start_date);
-
-CREATE INDEX idx_tournament_participants_tournament ON public.tournament_participants(tournament_id);
-CREATE INDEX idx_tournament_participants_player ON public.tournament_participants(player_id);
-
-CREATE INDEX idx_tournament_matches_tournament ON public.tournament_matches(tournament_id);
-CREATE INDEX idx_tournament_matches_round ON public.tournament_matches(tournament_id, round_number);
+-- Tournament indexes removed - not needed
 
 CREATE INDEX idx_daily_challenges_date ON public.daily_challenges(challenge_date);
 CREATE INDEX idx_daily_challenges_status ON public.daily_challenges(status);
