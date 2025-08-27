@@ -39,11 +39,39 @@ function App() {
         setUser(session.user);
         
         // Get user profile
-        const profile = await realtimeProfileService.getProfile(session.user.id);
-        setUserProfile(profile);
-        
-        console.log('✅ User authenticated:', session.user.email);
-        console.log('✅ User profile loaded:', profile);
+        try {
+          const profile = await realtimeProfileService.getProfile(session.user.id);
+          setUserProfile(profile);
+          console.log('✅ User authenticated:', session.user.email);
+          console.log('✅ User profile loaded:', profile);
+        } catch (error) {
+          console.error('❌ Error loading profile on init:', error);
+          // If profile doesn't exist, create it manually
+          if (error.message.includes('No rows found') || error.message.includes('not found')) {
+            console.log('🔧 Creating profile manually on init...');
+            try {
+              const { data: newProfile, error: createError } = await supabase
+                .from('profiles')
+                .insert([{
+                  id: session.user.id,
+                  username: session.user.user_metadata?.username || `Player${Date.now()}`,
+                  email: session.user.email,
+                  account_balance: 100.00
+                }])
+                .select()
+                .single();
+              
+              if (createError) {
+                console.error('❌ Failed to create profile manually on init:', createError);
+              } else {
+                console.log('✅ Profile created manually on init:', newProfile);
+                setUserProfile(newProfile);
+              }
+            } catch (createError) {
+              console.error('❌ Failed to create profile manually on init:', createError);
+            }
+          }
+        }
       } else {
         console.log('ℹ️ No active session');
       }
@@ -68,11 +96,38 @@ function App() {
           
           // Get user profile
           try {
+            console.log('🔍 Attempting to load profile for user:', session.user.id);
             const profile = await realtimeProfileService.getProfile(session.user.id);
-            setUserProfile(profile);
             console.log('✅ Profile loaded after auth change:', profile);
+            setUserProfile(profile);
           } catch (error) {
-            console.error('Error loading profile after auth change:', error);
+            console.error('❌ Error loading profile after auth change:', error);
+            // If profile doesn't exist, create it manually
+            if (error.message.includes('No rows found') || error.message.includes('not found')) {
+              console.log('🔧 Creating profile manually...');
+              try {
+                // Create profile manually using direct Supabase call
+                const { data: newProfile, error: createError } = await supabase
+                  .from('profiles')
+                  .insert([{
+                    id: session.user.id,
+                    username: session.user.user_metadata?.username || `Player${Date.now()}`,
+                    email: session.user.email,
+                    account_balance: 100.00
+                  }])
+                  .select()
+                  .single();
+                
+                if (createError) {
+                  console.error('❌ Failed to create profile manually:', createError);
+                } else {
+                  console.log('✅ Profile created manually:', newProfile);
+                  setUserProfile(newProfile);
+                }
+              } catch (createError) {
+                console.error('❌ Failed to create profile manually:', createError);
+              }
+            }
           }
         } else {
           setUser(null);
