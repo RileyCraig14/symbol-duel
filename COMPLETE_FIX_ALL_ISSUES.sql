@@ -46,9 +46,15 @@ CREATE POLICY "Users can insert their own profile" ON public.profiles FOR INSERT
 CREATE POLICY "Users can update their own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
 -- 3. Fix RLS policies for game_players table
+-- Drop ALL existing policies to avoid conflicts
 DROP POLICY IF EXISTS "Users can view all game players" ON public.game_players;
 DROP POLICY IF EXISTS "Users can join games" ON public.game_players;
 DROP POLICY IF EXISTS "Users can view their own game players" ON public.game_players;
+DROP POLICY IF EXISTS "Users can update their own game players" ON public.game_players;
+DROP POLICY IF EXISTS "Enable read access for all users" ON public.game_players;
+DROP POLICY IF EXISTS "Enable insert for authenticated users only" ON public.game_players;
+DROP POLICY IF EXISTS "Enable update for users based on player_id" ON public.game_players;
+DROP POLICY IF EXISTS "Enable delete for users based on player_id" ON public.game_players;
 
 -- Create working policies for game_players
 CREATE POLICY "Users can view all game players" ON public.game_players FOR SELECT USING (true);
@@ -56,9 +62,14 @@ CREATE POLICY "Users can join games" ON public.game_players FOR INSERT WITH CHEC
 CREATE POLICY "Users can update their own game players" ON public.game_players FOR UPDATE USING (auth.uid() = player_id);
 
 -- 4. Fix RLS policies for games table
+-- Drop ALL existing policies to avoid conflicts
 DROP POLICY IF EXISTS "Users can view all games" ON public.games;
 DROP POLICY IF EXISTS "Users can create games" ON public.games;
 DROP POLICY IF EXISTS "Users can update their own games" ON public.games;
+DROP POLICY IF EXISTS "Enable read access for all users" ON public.games;
+DROP POLICY IF EXISTS "Enable insert for authenticated users only" ON public.games;
+DROP POLICY IF EXISTS "Enable update for users based on creator_id" ON public.games;
+DROP POLICY IF EXISTS "Enable delete for users based on creator_id" ON public.games;
 
 -- Create working policies for games
 CREATE POLICY "Users can view all games" ON public.games FOR SELECT USING (true);
