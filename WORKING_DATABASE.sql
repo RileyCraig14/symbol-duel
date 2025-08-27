@@ -83,7 +83,6 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     games_won INTEGER DEFAULT 0,
     total_score INTEGER DEFAULT 0,
     win_rate DECIMAL(5,2) DEFAULT 0.00,
-    rank_position INTEGER DEFAULT 0,
     last_active TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -200,13 +199,12 @@ SELECT
     p.games_won,
     p.total_score,
     p.win_rate,
-    p.rank_position,
     p.last_active,
     p.created_at,
     COUNT(DISTINCT gp.game_id) as games_joined
 FROM public.profiles p
 LEFT JOIN public.game_players gp ON p.id = gp.player_id
-GROUP BY p.id, p.username, p.email, p.account_balance, p.total_winnings, p.games_played, p.games_won, p.total_score, p.win_rate, p.rank_position, p.last_active, p.created_at;
+GROUP BY p.id, p.username, p.email, p.account_balance, p.total_winnings, p.games_played, p.games_won, p.total_score, p.win_rate, p.last_active, p.created_at;
 
 -- 3. GAME_HISTORY VIEW - Basic game history
 CREATE OR REPLACE VIEW public.game_history AS
