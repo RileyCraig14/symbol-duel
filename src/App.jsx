@@ -213,6 +213,9 @@ function App() {
     try {
       setUser(user);
       
+      // Wait a moment for the database trigger to potentially create the profile
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       // Get user profile (should be created automatically by database trigger)
       const profile = await realtimeProfileService.getProfile(user.id);
       setUserProfile(profile);
@@ -220,7 +223,29 @@ function App() {
       console.log('✅ Auth success, profile loaded:', profile);
     } catch (error) {
       console.error('Error loading profile after auth success:', error);
-      // Profile might not exist yet, it will be created by the database trigger
+      // Profile doesn't exist, create it manually
+      console.log('🔧 Creating profile manually after auth success...');
+      try {
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert([{
+            id: user.id,
+            username: user.user_metadata?.username || `Player${Date.now()}`,
+            email: user.email,
+            account_balance: 100.00
+          }])
+          .select()
+          .single();
+        
+        if (createError) {
+          console.error('❌ Failed to create profile manually after auth success:', createError);
+        } else {
+          console.log('✅ Profile created manually after auth success:', newProfile);
+          setUserProfile(newProfile);
+        }
+      } catch (createError) {
+        console.error('❌ Failed to create profile manually after auth success:', createError);
+      }
     }
   };
 

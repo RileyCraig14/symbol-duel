@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
-const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+const stripePromise = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY 
+  ? loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY)
+  : null;
 
 const CheckoutForm = ({ amount, onSuccess, onError }) => {
   const stripe = useStripe();
@@ -90,6 +92,16 @@ const CheckoutForm = ({ amount, onSuccess, onError }) => {
 };
 
 const StripePayment = ({ amount, onSuccess, onError }) => {
+  if (!stripePromise) {
+    return (
+      <div className="max-w-md mx-auto p-6 text-center">
+        <h3 className="text-lg font-semibold mb-4">Payment Details</h3>
+        <p className="text-red-400 mb-4">Stripe payment is not configured for testing.</p>
+        <p className="text-gray-400">You can still test the app with fake money!</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="max-w-md mx-auto">
       <h3 className="text-lg font-semibold mb-4">Payment Details</h3>
