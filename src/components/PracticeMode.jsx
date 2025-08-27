@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PracticeMode = ({ user, onBack }) => {
@@ -37,7 +37,7 @@ const PracticeMode = ({ user, onBack }) => {
   const currentPuzzle = practicePuzzles[currentPuzzleIndex];
 
   // Define nextPuzzle function before using it in useEffect
-  const nextPuzzle = () => {
+  const nextPuzzle = useCallback(() => {
     if (currentPuzzleIndex < practicePuzzles.length - 1) {
       setCurrentPuzzleIndex(prev => prev + 1);
       setUserAnswer('');
@@ -46,7 +46,7 @@ const PracticeMode = ({ user, onBack }) => {
     } else {
       setGameCompleted(true);
     }
-  };
+  }, [currentPuzzleIndex, practicePuzzles.length]);
 
   // Define startTimer function before using it in nextPuzzle
   const startTimer = () => {
