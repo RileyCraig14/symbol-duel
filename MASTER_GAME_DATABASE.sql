@@ -68,13 +68,13 @@ DROP INDEX IF EXISTS idx_game_players_game_id;
 DROP INDEX IF EXISTS idx_game_players_player_id;
 DROP INDEX IF EXISTS idx_game_rounds_game_id;
 DROP INDEX IF EXISTS idx_player_answers_round_id;
-DROP INDEX IF EXISTS idx_tournaments_status;
+-- Tournament indexes removed - not needed
 DROP INDEX IF EXISTS idx_daily_challenges_date;
 DROP INDEX IF EXISTS idx_custom_puzzles_creator_id;
 
 -- Drop all constraints
 ALTER TABLE public.games DROP CONSTRAINT IF EXISTS games_game_status_check;
-ALTER TABLE public.tournaments DROP CONSTRAINT IF EXISTS tournaments_status_check;
+-- Tournament constraints removed - not needed
 ALTER TABLE public.daily_challenges DROP CONSTRAINT IF EXISTS daily_challenges_status_check;
 
 -- Drop all views
