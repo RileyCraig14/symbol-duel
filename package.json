@@ -1,6 +1,6 @@
 {
   "name": "symbol-duel",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "dependencies": {
     "@stripe/react-stripe-js": "^2.4.0",
