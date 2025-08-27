@@ -58,8 +58,18 @@ const AuthForm = ({ onAuthSuccess }) => {
 
         if (data.user) {
           console.log('✅ User signed up successfully:', data.user.email);
-          // Profile will be created automatically by database trigger
-          onAuthSuccess(data.user);
+          console.log('✅ User data:', data);
+          console.log('✅ Session:', data.session);
+          
+          // Check if email confirmation is required
+          if (data.user.email_confirmed_at) {
+            console.log('✅ Email already confirmed, creating profile...');
+            // Profile will be created automatically by database trigger
+            onAuthSuccess(data.user);
+          } else {
+            console.log('📧 Email confirmation required');
+            setError('Please check your email and click the confirmation link to complete signup.');
+          }
         }
       } else {
         // Sign in validation
