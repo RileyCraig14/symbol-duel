@@ -258,7 +258,7 @@ export const realtimeGameService = {
         .eq('player_id', ranking.player_id);
     }
 
-    // Update game status
+    // Update game status to completed (this will trigger the calculate_game_results function)
     const winner = rankings[0];
     const { data, error } = await supabase
       .from('games')
@@ -273,6 +273,30 @@ export const realtimeGameService = {
       .single();
 
     if (error) throw error;
+
+    // Manually call calculate_game_results to ensure winnings are distributed
+    try {
+      const { error: calcError } = await supabase.rpc('calculate_game_results', { game_id: gameId });
+      if (calcError) {
+        console.log('⚠️ Auto-calculation failed, using manual fallback:', calcError.message);
+        // Manual fallback: update winner's balance
+        if (winner) {
+          const prizePool = await this.calculateWinnings(gameId);
+          await supabase
+            .from('profiles')
+            .update({ 
+              total_winnings: supabase.sql`total_winnings + ${prizePool}`,
+              games_won: supabase.sql`games_won + 1`
+            })
+            .eq('id', winner.player_id);
+        }
+      } else {
+        console.log('✅ Game results calculated automatically');
+      }
+    } catch (calcError) {
+      console.log('⚠️ Calculation error:', calcError.message);
+    }
+
     return data;
   },
 

@@ -393,6 +393,13 @@ CREATE TRIGGER trigger_update_game_status
     AFTER INSERT OR DELETE ON public.game_players
     FOR EACH ROW EXECUTE FUNCTION public.update_game_status();
 
+-- 4. Game completion trigger (calls calculate_game_results)
+CREATE TRIGGER trigger_game_completion
+    AFTER UPDATE ON public.games
+    FOR EACH ROW
+    WHEN (OLD.status != 'completed' AND NEW.status = 'completed')
+    EXECUTE FUNCTION public.calculate_game_results(NEW.id);
+
 -- =====================================================
 -- STEP 7: CREATE POLICIES (RLS)
 -- =====================================================
