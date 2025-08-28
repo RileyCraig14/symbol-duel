@@ -317,20 +317,11 @@ BEGIN
     
     -- Find winner (highest score)
     SELECT gp.player_id, gp.player_username INTO winner_id, winner_username
-    FROM public.game_players gp
-    WHERE gp.game_id = game_id
+    FROM public.games g
+    JOIN public.game_players gp ON g.id = gp.game_id
+    WHERE g.id = game_id
     ORDER BY gp.final_score DESC
     LIMIT 1;
-    
-    -- Update game with winner
-    UPDATE public.games 
-    SET 
-        winner_id = winner_id,
-        winner_username = winner_username,
-        status = 'completed',
-        completed_at = NOW(),
-        updated_at = NOW()
-    WHERE id = game_id;
     
     -- Award prize to winner
     IF winner_id IS NOT NULL THEN
@@ -374,6 +365,18 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- 6. Trigger wrapper function for game completion
+CREATE OR REPLACE FUNCTION public.handle_game_completion()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Only process when status changes to completed
+    IF OLD.status != 'completed' AND NEW.status = 'completed' THEN
+        PERFORM public.calculate_game_results(NEW.id);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- =====================================================
 -- STEP 6: CREATE TRIGGERS
 -- =====================================================
@@ -397,8 +400,7 @@ CREATE TRIGGER trigger_update_game_status
 CREATE TRIGGER trigger_game_completion
     AFTER UPDATE ON public.games
     FOR EACH ROW
-    WHEN (OLD.status != 'completed' AND NEW.status = 'completed')
-    EXECUTE FUNCTION public.calculate_game_results(NEW.id);
+    EXECUTE FUNCTION public.handle_game_completion();
 
 -- =====================================================
 -- STEP 7: CREATE POLICIES (RLS)
